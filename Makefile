@@ -15,14 +15,17 @@ OBJS=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 all: $(TARGET)
 
-with_leak: $(OBJS)
-	$(CC) -o $(TARGET) $(OBJS) $(CFLAGS_NO_SANINATIZE) 
-
 $(TARGET): $(OBJS)
 	$(CC) -o $(TARGET) $(OBJS) $(CFLAGS) 
 
 $(OBJ)/%.o: $(SRC)/%.c 
 	${CC} ${CFLAGS} -c $< -o $@
+
+with_leak: $(OBJS)
+	$(CC) -o $(TARGET) $(OBJS) $(CFLAGS_NO_SANINATIZE) 
+
+$(OBJ)/%.o: $(SRC)/%.c 
+	${CC} ${CFLAGS_NO_SANINATIZE} -c $< -o $@
 
 clean:
 	$(RM) $(TARGET) $(BIN)/*.dSYM $(OBJ)/*.o 
