@@ -17,35 +17,33 @@
  */
 
 #include "../include/run.h"
+#include "../include/command.h"
 
-static bool is_exit(char *command, ssize_t read_len);
-
+static bool is_exit(command_t *command);
 void main_loop(void)
 {
 
-  char *command = NULL;
-  size_t len = 0;
-  ssize_t read_len = 0;
+  command_t *command = init_command();
 
-  while ((is_exit(command, read_len)) == false)
+  while (!(is_exit(command)))
   {
-    read_len = getline(&command, &len, stdin);
+    command->len = getline(&command->input, &command->num_bytes, stdin);
   }
 
+  free(command->input);
   free(command);
 
 }
 
 
-
-static bool is_exit(char *command, ssize_t read_len) {
-  if(command == NULL)
+static bool is_exit(command_t *command) {
+  if(command->input == NULL)
     return false;
 
-  if(read_len == -1)
+  if(command->len == -1)
     return true;
 
-  return strncmp(command, EXIT, read_len) == 0;
+  return strncmp(command->input, EXIT, command->len + 1) == 0;
 }
 
 
