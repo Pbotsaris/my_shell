@@ -25,9 +25,10 @@ typedef struct command
   char *input; 
   ssize_t len;
   size_t num_bytes;
+  int cursor;
 
-}command_t;
+}cmd_t;
 
-command_t *init_command(void);
+cmd_t *init_command(void);
 
 #endif

@@ -18,18 +18,26 @@
 #include "../include/command.h"
 
 
-command_t *init_command(void)
+cmd_t *init_command(void)
 {
 
-  command_t *command     = (command_t*)malloc(sizeof(command_t));
+  cmd_t *command     = (cmd_t*)malloc(sizeof(cmd_t));
   command->input         = NULL;
   command->len           = 0;
   command->num_bytes     = 0;
+  command->cursor        = 0;
 
   return command;
 
 }
 
+static void parse(cmd_t *command)
+{
 
-
+   if(command->input[command->cursor] == ' ')
+   {
+     command->cursor++;
+     parse(command);
+   }
+}
 

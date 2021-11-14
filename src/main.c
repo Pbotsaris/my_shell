@@ -18,7 +18,13 @@
 
 #include "../include/run.h"
 
-int main(void)
+int main(int ac, char **av, char **envs)
 { 
+  (void)ac;
+  (void)av;
+
+  read_envs(envs);
   main_loop();
+
+  
 }
