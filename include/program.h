@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  main.c
+ *       Filename:  program.h
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  11/13/21 12:42:32
+ *        Created:  11/14/21 12:54:27
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -16,13 +16,23 @@
  * =====================================================================================
  */
 
-#include "../include/run.h"
 
-int main(int ac, char **av, char **envs)
-{ 
-  (void)ac;
-  (void)av;
 
-  main_loop(envs);
-  
-}
+#ifndef PROGRAM_H
+#define PROGRAM_H
+
+#include "../include/command.h"
+#include "../include/env.h"
+
+typedef struct program
+{
+  env_t *env;
+  cmd_t *cmd;
+  void (*free) (struct program*);
+
+}prgm_t;
+
+
+prgm_t *init_program(char **envs);
+
+#endif
