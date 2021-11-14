@@ -23,14 +23,14 @@ static void read_envs(env_t *env, char **envs);
 static void free_envs(env_t *env);
 
 /* PRIVATE */
-static char *extract_paths(char *env);
+static char *extract(char *env, char *var_name);
 static void split_paths(env_t *env, char *paths);
 
 /* PRIVATE HELPERS */
 static int count_paths(char *paths);
 static char *read_pair(char *env, int key_len);
 static int key_length(char *env);
-static bool is_path(char *env, int key_len);
+static bool compare(char *env, char *str_to_cmp, int key_len);
 
 
 /* PLUBIC INITIALIZER */
@@ -39,12 +39,12 @@ env_t *init_env(void)
 {
   env_t *env       = (env_t*)malloc(sizeof(env_t));
   env->paths       = NULL;
+  env->user        = NULL;
   env->read_envs   = read_envs;
   env->free        = free_envs;
 
   return env;
 }
-
 
 /* PUBLIC METHOD */
 
@@ -55,14 +55,20 @@ static void read_envs(env_t *env, char **envs)
 
   while(envs[i]) 
   {
-   paths = extract_paths(envs[i]);
+    paths = extract(envs[i], PATH);
 
-    if(paths != NULL)
+    if(paths)
     {
-       split_paths(env, paths);
-       free(paths);
-       break;
+      split_paths(env, paths);
+      free(paths);
     }
+
+    if(env->user == NULL)
+     env->user  = extract(envs[i], USER);
+
+    if(env->user && env->paths)
+      break;
+
     i++;
   }
 }
@@ -74,18 +80,19 @@ static void free_envs(env_t *env)
   for(int i = 0; i < env->paths_len; i++)
     free(env->paths[i]);
 
+  free(env->user);
   free(env->paths);
   free(env);
 }
 
 /* PRIVATE */
 
-static char *extract_paths(char *env)
+static char *extract(char *env, char *var_name)
 {
 
   int key_len = key_length(env);
 
-  if(is_path(env, key_len))
+  if(compare(env, var_name, key_len))
     return read_pair(env, key_len);
 
 
@@ -105,19 +112,19 @@ static void split_paths(env_t *env, char *paths)
 
   while(cursor)
   {
-   size_t len         = strlen(cursor);
-   char *path         = (char*) malloc((len + 1) * sizeof(char));
+    size_t len         = strlen(cursor);
+    char *path         = (char*) malloc((len + 1) * sizeof(char));
 
-   strncpy(path, cursor, len);
+    strncpy(path, cursor, len);
 
-   path[len]          = '\0';
-   env->paths[index]  = path;
+    path[len]          = '\0';
+    env->paths[index]  = path;
 
-   cursor = strtok(NULL, DELIM);
+    cursor = strtok(NULL, DELIM);
 
-   index++;
+    index++;
   }
-  
+
 }
 
 
@@ -125,21 +132,21 @@ static void split_paths(env_t *env, char *paths)
 
 static int count_paths(char *paths)
 {
- int i          = 0;
- int count      = 0;
- char delim[]   = DELIM;
+  int i          = 0;
+  int count      = 0;
+  char delim[]   = DELIM;
 
- while(paths[i] != '\0')
- {
+  while(paths[i] != '\0')
+  {
 
-   if(paths[i]  == delim[0])
-     count++;
+    if(paths[i]  == delim[0])
+      count++;
 
-   i++;
- }
- 
- /* add one as last item does not have a separator */
- return ++count;
+    i++;
+  }
+
+  /* add one as last item does not have a separator */
+  return ++count;
 }
 
 /**/
@@ -181,14 +188,14 @@ static int key_length(char *env)
 
 /**/
 
-static bool is_path(char *env, int key_len)
+static bool compare(char *env, char *str_to_cmp, int key_len)
 {
 
   char key[key_len]; 
   strncpy(key, env, key_len);
   key[key_len] = '\0';
 
-  if(strncmp(PATH, key, key_len) == 0)
+  if(strncmp(str_to_cmp, key, key_len) == 0)
     return true;
 
   return false;

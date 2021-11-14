@@ -27,12 +27,14 @@
 #include <stdio.h>
 
 #define PATH "PATH"
+#define USER "USER"
 #define DELIM ":"
 
 typedef struct env{
 
   int paths_len;
   char **paths;
+  char *user;
   void (*read_envs) (struct env*, char**);
   void (*free) (struct env*);
 

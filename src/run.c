@@ -20,11 +20,14 @@
 
 static bool is_not_exit(cmd_t *command);
 static void prompt(void);
+static void print_envs(prgm_t *program);
 
 void main_loop(char **envs)
 {
 
   prgm_t *program = init_program(envs);
+
+  print_envs(program);
 
   while (is_not_exit(program->cmd))
   {
@@ -47,4 +50,15 @@ static bool is_not_exit(cmd_t *command) {
 }
 
 static void prompt(void) {printf("%%> ");}
+
+
+static void print_envs(prgm_t *program)
+{
+  for(int i = 0; i < program->env->paths_len; i++)
+          printf("%s\n", program->env->paths[i]);
+
+
+  printf("user: %s\n", program->env->user);
+
+}
 
