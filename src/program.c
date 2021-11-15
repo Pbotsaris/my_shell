@@ -52,9 +52,9 @@ static void free_program(prgm_t *program)
 
 static void read_line(prgm_t *program)
 {
-  char *temp          = program->cmd->line;
-  program->cmd->line  = readline("");
-  program->cmd->len   = strlen(program->cmd->line);
+  char *temp                = program->cmd->line;
+  program->cmd->line        = readline("");
+  program->cmd->len         = strlen(program->cmd->line);
 
   add_history(program->cmd->line);
   free(temp);
@@ -64,6 +64,10 @@ static void read_line(prgm_t *program)
 
 static void print_prompt(prgm_t *program) 
 {
+  /* update pwd at every command in case of cd */
+  entry_t *pwd          = program->env->map->get(program->env->map, PWD);
+  program->env->pwd     = pwd->pair;
+
   printf("%s %s %s %s", program->env->user, PSEP, program->env->pwd, PSUFIX);
 
 }

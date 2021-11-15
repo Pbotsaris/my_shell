@@ -24,9 +24,7 @@ static void free_envs(env_t *env);
 static void print_envs(env_t *env);
 
 /* PRIVATE */
-static char *extract(char *env, char *key_name);
 static void split_paths(env_t *env, char *paths);
-
 static char* get_key(char *env);
 static char* get_pair(char *env);
 
@@ -34,7 +32,6 @@ static char* get_pair(char *env);
 static int count_paths(char *paths);
 static char *read_pair(char *env, int key_len);
 static int key_length(char *env);
-static bool compare(char *env, char *str_to_cmp, int key_len);
 
 /* PLUBIC INITIALIZER */
 
@@ -45,7 +42,6 @@ env_t *init_env(void)
   env->paths       = NULL;
   env->pwd         = NULL;
   env->user        = NULL;
-  env->value       = NULL;
   env->load        = load_envs;
   env->free        = free_envs;
   env->print       = print_envs;
@@ -57,37 +53,30 @@ env_t *init_env(void)
 
 static void load_envs(env_t *env, char **envs)
 {
-  char *paths      = NULL;
-  env->value       = envs;
-  int i = 0;
+
+  env->value         = envs;
+  int i              = 0;
 
   while(envs[i]) 
   {
-    paths = extract(envs[i], PATH);
-    char *key = get_key(envs[i]);
-    char *pair = get_pair(envs[i]);
+    char *key        = get_key(envs[i]);
+    char *pair       = get_pair(envs[i]);
 
     env->map->insert(env->map, key, pair);
     free(pair);
     free(key);
 
-    if(paths)
-    {
-      split_paths(env, paths);
-      free(paths);
-    }
-
-    if(env->user == NULL)
-      env->user  = extract(envs[i], USER);
-
-    if(env->pwd == NULL)
-      env->pwd = extract(envs[i], PWD);
-
-    if(env->user && env->paths && env->pwd)
-      break;
-
     i++;
   }
+
+  entry_t *path     = env->map->get(env->map, PATH);
+  entry_t *user     = env->map->get(env->map, USER);
+  entry_t *pwd      = env->map->get(env->map, PWD);
+  env->user         = user->pair;
+  env->pwd          = pwd->pair;
+
+  split_paths(env, path->pair);
+
 }
 
 /**/
@@ -96,12 +85,10 @@ static void free_envs(env_t *env)
 {
   for(int i = 0; i < env->paths_len; i++)
     free(env->paths[i]);
-  
-  
+
+
   env->map->free(env->map);
 
-  free(env->user);
-  free(env->pwd);
   free(env->paths);
   free(env);
 }
@@ -113,24 +100,9 @@ static void print_envs(env_t *env)
   env->map->print_all(env->map);
 }
 
-/**/
 
 /* PRIVATE */
 
-static char *extract(char *env, char *key_name)
-{
-
-  int key_len = key_length(env);
-
-  if(compare(env, key_name, key_len))
-    return read_pair(env, key_len);
-
-
-  return NULL;
-}
-
-
-/**/
 
 static char* get_key(char *env)
 {
@@ -239,20 +211,4 @@ static int key_length(char *env)
   }
 
   return key_len;
-}
-
-
-/**/
-
-static bool compare(char *env, char *str_to_cmp, int key_len)
-{
-
-  char key[key_len]; 
-  strncpy(key, env, key_len);
-  key[key_len] = '\0';
-
-  if(strncmp(str_to_cmp, key, key_len) == 0)
-    return true;
-
-  return false;
 }
