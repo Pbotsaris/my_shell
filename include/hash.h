@@ -44,6 +44,7 @@ typedef struct map {
  bool            (*destroy) (struct map*, char*);
  void            (*free) (struct map*);
  void            (*print_all) (struct map*);
+ char          **(*to_array) (struct map*);
 
 }map_t;
 

@@ -24,9 +24,11 @@ static void free_envs(env_t *env);
 static void print_envs(env_t *env);
 
 /* PRIVATE */
-static int find(env_t *env, char *key_name);
 static char *extract(char *env, char *key_name);
 static void split_paths(env_t *env, char *paths);
+
+static char* get_key(char *env);
+static char* get_pair(char *env);
 
 /* PRIVATE HELPERS */
 static int count_paths(char *paths);
@@ -39,6 +41,7 @@ static bool compare(char *env, char *str_to_cmp, int key_len);
 env_t *init_env(void)
 {
   env_t *env       = (env_t*)malloc(sizeof(env_t));
+  env->map         = init_map();
   env->paths       = NULL;
   env->pwd         = NULL;
   env->user        = NULL;
@@ -61,6 +64,12 @@ static void load_envs(env_t *env, char **envs)
   while(envs[i]) 
   {
     paths = extract(envs[i], PATH);
+    char *key = get_key(envs[i]);
+    char *pair = get_pair(envs[i]);
+
+    env->map->insert(env->map, key, pair);
+    free(pair);
+    free(key);
 
     if(paths)
     {
@@ -87,6 +96,9 @@ static void free_envs(env_t *env)
 {
   for(int i = 0; i < env->paths_len; i++)
     free(env->paths[i]);
+  
+  
+  env->map->free(env->map);
 
   free(env->user);
   free(env->pwd);
@@ -98,46 +110,12 @@ static void free_envs(env_t *env)
 
 static void print_envs(env_t *env)
 {
-  for(int i = 0; i < env->paths_len; i++)
-          printf("%s\n", env->paths[i]);
-
-  printf("user: %s\n",env->user);
-  printf("pwd: %s\n", env->pwd);
+  env->map->print_all(env->map);
 }
 
 /**/
 
-//static void set_env(env_t *env, char *key, char *pair)
-//{
-//  int found = find(env, key);
-//  
-//  if(found  >= 0)
-//  {
-//
-//    // ARRAY FOR ENVS NEED TO ME ALLOCATED. MAYBE NEED A LINKED LIST SO IS DYNAMIC
-//
-//  }
-//
-//}
-
 /* PRIVATE */
-
-static int find(env_t *env, char *key_name)
-{
-  int i = 0;
-
-  while(env->value[i]) 
-  {
-
-    int key_len = key_length(env->value[i]);
-    if(compare(env->value[i], key_name, key_len))
-      return i;
-    i++;
-  }
-
-  return -1;
-
-}
 
 static char *extract(char *env, char *key_name)
 {
@@ -150,6 +128,29 @@ static char *extract(char *env, char *key_name)
 
   return NULL;
 }
+
+
+/**/
+
+static char* get_key(char *env)
+{
+  int key_len = key_length(env);
+
+  char *key = (char*) malloc(key_len + 1 * sizeof(char));
+  strncpy(key, env, key_len);
+  key[key_len] = '\0';
+
+  return key;
+
+}
+
+static char* get_pair(char *env)
+{
+  int key_len = key_length(env);
+  return read_pair(env, key_len);
+
+}
+
 
 /**/
 

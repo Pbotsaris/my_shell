@@ -24,10 +24,12 @@ static entry_t *get(map_t *map, char *key);
 static bool destroy(map_t *map, char *key);
 static void print_all(map_t *map);
 static void free_map(map_t *map);
+static char **to_array(map_t *map);
 
 /* PRIVATE */
 static entry_t *create_entry(char *key, char *pair);
 static entry_t *update_entry(entry_t *entry, char *pair);
+static int count(map_t *map);
 static unsigned int hash(const char *key);
 
 /* PUBLIC INITIALIZER */
@@ -41,6 +43,7 @@ map_t *init_map(void)
   map->destroy          = destroy;
   map->print_all        = print_all;
   map->free             = free_map;
+  map->to_array         = to_array;
 
   for(int i = 0; i < T_SIZE; i++)
     map->entries[i] = NULL;
@@ -50,6 +53,7 @@ map_t *init_map(void)
 }
 
 /* PUBLIC METHODS */
+
 
 static void insert(map_t *map, char *key, char *pair)
 {
@@ -153,6 +157,7 @@ static void free_map(map_t *map)
   free(map);
 }
 
+/**/
 
 static void print_all(map_t *map)
 {
@@ -165,13 +170,51 @@ static void print_all(map_t *map)
 
     while(entry != NULL)
     {
-
-     printf("%s=%s\n", entry->key, entry->pair);
+      printf("%s=%s\n", entry->key, entry->pair);
       entry = entry->next;
     }
 
   }
 
+}
+
+/**/
+
+static char **to_array(map_t *map)
+{
+  int n_entries        = count(map);
+  int i_envs           = 0;
+  char **envs          =(char**)malloc((n_entries + 1) * sizeof(char*));
+
+  for(int i = 0; i < T_SIZE; i++)
+  {
+    entry_t *entry = map->entries[i];
+
+    if(entry == NULL)
+      continue;
+
+    while(entry != NULL)
+    {
+      size_t klen     = strlen(entry->key);
+      size_t plen     = strlen(entry->pair);
+      char *env       = (char*) malloc((klen + plen + 2) * sizeof(char));
+
+      strncpy(env, entry->key, klen);
+      env[klen]       = '\0';
+
+      strncat(env, "=", 2);
+      strncat(env, entry->pair, plen);
+
+      envs[i_envs]   = env;
+
+      entry          = entry->next;
+      i_envs++;
+    }
+  }
+
+  /* null last item */
+  envs[i_envs] = NULL;
+  return envs;
 }
 
 /* PRIVATE */
@@ -206,6 +249,31 @@ static entry_t *create_entry(char *key, char *pair)
 
   return entry;
 }
+
+/**/
+
+static int count(map_t *map)
+{
+
+  int count = 0;
+
+  for(int i = 0; i < T_SIZE; i++)
+  {
+    entry_t *entry = map->entries[i];
+
+    if(entry == NULL)
+      continue;
+
+    while(entry != NULL)
+    {
+      count++;
+      entry = entry->next;
+    }
+  }
+
+  return count;
+}
+
 
 /**/
 

@@ -24,19 +24,7 @@ void main_loop(char **envs)
 {
 
   prgm_t *program = init_program(envs);
-  map_t *map = init_map();
-
-   map->insert(map, "pedro", "500");
-   map->insert(map, "marina", "200");
-   map->insert(map, "wilson", "100");
-
-  // entry_t *entry = map->get(map, "pedro");
-  // printf("%s=%s\n", entry->key, entry->pair);
-  //
-   map->print_all(map);
-   map->destroy(map, "marina");
-   map->print_all(map);
-
+ 
  //  print_envs(program);
   while (program->cmd->not_exit(program->cmd))
   {
@@ -44,7 +32,12 @@ void main_loop(char **envs)
     program->readline(program);
   }
 
-  map->free(map);
+  entry_t *e = program->env->map->get(program->env->map, "PATH");
+
+  printf("%s=%s\n", e->key, e->pair);
+
+
+
   program->free(program);
 
 }

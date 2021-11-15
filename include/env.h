@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "../include/hash.h"
 
 #define PATH "PATH"
 #define USER "USER"
@@ -34,6 +35,7 @@
 typedef struct env{
 
   char **value;
+  map_t *map;
   char **paths;
   int paths_len;
   char *user;
