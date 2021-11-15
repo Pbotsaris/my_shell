@@ -45,7 +45,6 @@ typedef struct map {
  void            (*free) (struct map*);
  void            (*print_all) (struct map*);
 
- 
 }map_t;
 
 

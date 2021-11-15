@@ -28,15 +28,19 @@
 
 #define PATH "PATH"
 #define USER "USER"
+#define PWD "PWD"
 #define DELIM ":"
 
 typedef struct env{
 
-  int paths_len;
+  char **value;
   char **paths;
+  int paths_len;
   char *user;
-  void (*read_envs) (struct env*, char**);
+  char *pwd;
+  void (*load) (struct env*, char**);
   void (*free) (struct env*);
+  void (*print) (struct env*);
 
 }env_t;
 

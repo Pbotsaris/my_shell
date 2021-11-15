@@ -19,13 +19,18 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+#define EXIT "exit"
 
 typedef struct command
 {
-  char *input; 
+  char *line; 
   ssize_t len;
-  size_t num_bytes;
   int cursor;
+
+  bool (*not_exit) (struct command*);
 
 }cmd_t;
 

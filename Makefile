@@ -2,9 +2,9 @@ SRC=src
 OBJ=obj
 BIN=bin
 
-CFLAGS +=-W  -Wall -Wextra -g3 -Iinclude -fsanitize=address
+CFLAGS +=-W  -Wall -Wextra -g3 -Iinclude -lreadline -fsanitize=address
 
-CFLAGS_NO_SANINATIZE +=-W -Wall -Wextra -g3 -Iinclude
+CFLAGS_NO_SANINATIZE +=-W -Wall -Wextra -lreadline -g3 -Iinclude
 
 CC=gcc
 TARGET=$(BIN)/my_zsh

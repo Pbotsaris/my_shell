@@ -91,7 +91,7 @@ static entry_t *get(map_t *map, char *key)
   if(entry == NULL)
     return NULL;
 
-  while(entry)
+  while(entry != NULL)
   {
     if(strcmp(entry->key, key) == 0)
       return entry;
@@ -127,6 +127,28 @@ static bool destroy(map_t *map, char *key)
 
 static void free_map(map_t *map)
 {
+
+  for(int i = 0; i < T_SIZE; i++)
+  {
+    entry_t *entry = map->entries[i];
+    entry_t *entry_to_free;
+
+    if(entry == NULL)
+      continue;
+
+    while(entry != NULL)
+    {
+     free(entry->key);
+     free(entry->pair);
+
+     entry_to_free = entry;
+     entry = entry->next;
+
+     free(entry_to_free);
+    }
+
+  }
+
   free(map->entries);
   free(map);
 }
@@ -139,11 +161,12 @@ static void print_all(map_t *map)
     entry_t *entry = map->entries[i];
 
     if(entry == NULL)
-      continue;
+        continue;
 
-    while(entry)
+    while(entry != NULL)
     {
-      printf("%s=%s\n", entry->key, entry->pair);
+
+     printf("%s=%s\n", entry->key, entry->pair);
       entry = entry->next;
     }
 
@@ -173,9 +196,13 @@ static entry_t *create_entry(char *key, char *pair)
   entry_t *entry    = (entry_t*)malloc(sizeof(entry_t));
   entry->key        = (char*)malloc( (klen  + 1) * sizeof(char));
   entry->pair       = (char*)malloc((plen + 1) * sizeof(char));
+  entry->next       = NULL;
 
   strncpy(entry->key, key, klen);
-  strncpy(entry->pair, pair, plen);
+  strncpy(entry->pair, pair, plen); 
+
+  entry->key[klen] = '\0';
+  entry->pair[plen] = '\0';
 
   return entry;
 }

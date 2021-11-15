@@ -19,14 +19,13 @@
 #ifndef RUN_H
 #define RUN_H
 
-#define EXIT "exit\n"
+#define EXIT "exit"
 
 #include "../include/program.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 void main_loop(char **envs);
 

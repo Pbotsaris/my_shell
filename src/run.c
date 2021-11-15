@@ -18,47 +18,35 @@
 
 #include "../include/run.h"
 
-static bool is_not_exit(cmd_t *command);
-static void prompt(void);
-static void print_envs(prgm_t *program);
+//static void print_envs(prgm_t *program);
 
 void main_loop(char **envs)
 {
 
   prgm_t *program = init_program(envs);
+  map_t *map = init_map();
 
-  print_envs(program);
+   map->insert(map, "pedro", "500");
+   map->insert(map, "marina", "200");
+   map->insert(map, "wilson", "100");
 
-  while (is_not_exit(program->cmd))
+  // entry_t *entry = map->get(map, "pedro");
+  // printf("%s=%s\n", entry->key, entry->pair);
+  //
+   map->print_all(map);
+   map->destroy(map, "marina");
+   map->print_all(map);
+
+ //  print_envs(program);
+  while (program->cmd->not_exit(program->cmd))
   {
-    prompt();
-    program->cmd->len = getline(&program->cmd->input, &program->cmd->num_bytes, stdin);
+    program->print_prompt(program);
+    program->readline(program);
   }
 
+  map->free(map);
   program->free(program);
 
- }
-
-static bool is_not_exit(cmd_t *command) {
-  if(command->input == NULL)
-    return true;
-
-  if(command->len == -1)
-    return false;
-
-  return !(strncmp(command->input, EXIT, command->len + 1) == 0);
 }
 
-static void prompt(void) {printf("%%> ");}
-
-
-static void print_envs(prgm_t *program)
-{
-  for(int i = 0; i < program->env->paths_len; i++)
-          printf("%s\n", program->env->paths[i]);
-
-
-  printf("user: %s\n", program->env->user);
-
-}
 

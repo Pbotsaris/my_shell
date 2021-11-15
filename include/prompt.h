@@ -16,3 +16,12 @@
  * =====================================================================================
  */
 
+#ifndef PROMPT_H
+#define PROMPT_H
+
+typedef struct prompt {
+
+}prompt_t;
+
+
+#endif
