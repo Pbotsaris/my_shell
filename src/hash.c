@@ -72,7 +72,7 @@ static void insert(map_t *map, char *key, char *pair)
   {
     if(strcmp(entry->key, key) == 0)
     {
-      free(pair);
+      free(entry->pair);
       update_entry(entry, pair);
     }
     prev = entry;
@@ -225,6 +225,8 @@ static entry_t *update_entry(entry_t *entry, char *pair)
   entry->pair       = (char*)malloc((plen + 1) * sizeof(char));
 
   strncpy(entry->pair, pair, plen);
+  entry->pair[plen]       = '\0';
+ 
 
   return entry;
 
@@ -279,8 +281,8 @@ static int count(map_t *map)
 
 /* http://www.cse.yorku.ca/~oz/hash.html  */
 static unsigned int hash(const char *key)
-
 {
+
   unsigned long hash = HASH;
   int c;
 

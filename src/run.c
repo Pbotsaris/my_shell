@@ -28,6 +28,13 @@ void main_loop(char **envs)
     program->print_prompt(program);
     program->readline(program);
 
+    entry_t *e = program->env->bin->get(program->env->bin, "ls");
+
+    if(e != NULL)
+     {
+      printf("ls was found. printing -> %s\n", e->pair);
+     }
+
     token_t *token = program->lexer->get_next_token(program->lexer);
 
     if(token != NULL && token->type == EXIT)
@@ -44,7 +51,6 @@ void main_loop(char **envs)
         printf("was VAR!\n");
         free(token->value);
     }
-
 
     if(token != NULL && token->type == BIN)
     {

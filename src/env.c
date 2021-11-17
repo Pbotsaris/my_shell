@@ -19,16 +19,19 @@
 #include "../include/env.h"
 
 /* PUBLIC METHOD */
-static void load_envs(env_t *env, char **envs);
+static void load(env_t *env, char **envs);
 static void free_envs(env_t *env);
 static void print_envs(env_t *env);
 
 /* PRIVATE */
+static void load_envs(env_t *env, char **envs);
+static void load_bin(env_t *env);
+
+/* PRIVATE HELPERS */
+static void load_from_bindir(env_t *env, char *path);
 static void split_paths(env_t *env, char *paths);
 static char* get_key(char *env);
 static char* get_pair(char *env);
-
-/* PRIVATE HELPERS */
 static int count_paths(char *paths);
 static char *read_pair(char *env, int key_len);
 static int key_length(char *env);
@@ -39,10 +42,11 @@ env_t *init_env(void)
 {
   env_t *env       = (env_t*)malloc(sizeof(env_t));
   env->vars        = init_map();
+  env->bin         = init_map();
   env->paths       = NULL;
   env->pwd         = NULL;
   env->user        = NULL;
-  env->load        = load_envs;
+  env->load        = load;
   env->free        = free_envs;
   env->print       = print_envs;
 
@@ -50,6 +54,38 @@ env_t *init_env(void)
 }
 
 /* PUBLIC METHOD */
+
+static void load(env_t *env, char **envs)
+{
+  /* load_envs MUST be called first */
+  load_envs(env, envs);
+  load_bin(env);
+}
+
+
+/**/
+
+static void free_envs(env_t *env)
+{
+  for(int i = 0; i < env->paths_len; i++)
+    free(env->paths[i]);
+
+  env->vars->free(env->vars);
+  env->bin->free(env->bin);
+
+  free(env->paths);
+  free(env);
+}
+
+/**/
+
+static void print_envs(env_t *env)
+{
+  env->vars->print_all(env->vars);
+}
+
+
+/* PRIVATE */
 
 static void load_envs(env_t *env, char **envs)
 {
@@ -78,50 +114,38 @@ static void load_envs(env_t *env, char **envs)
 
 }
 
-/**/
-
-static void free_envs(env_t *env)
+static void load_bin(env_t *env)
 {
-  for(int i = 0; i < env->paths_len; i++)
-    free(env->paths[i]);
 
+   for(int i = 0; i < env->paths_len; i++)
+     load_from_bindir(env, env->paths[i]);
 
-  env->vars->free(env->vars);
-
-  free(env->paths);
-  free(env);
-}
-
-/**/
-
-static void print_envs(env_t *env)
-{
-  env->vars->print_all(env->vars);
-}
-
-
-/* PRIVATE */
-
-
-static char* get_key(char *env)
-{
-  int key_len = key_length(env);
-
-  char *key = (char*) malloc(key_len + 1 * sizeof(char));
-  strncpy(key, env, key_len);
-  key[key_len] = '\0';
-
-  return key;
 
 }
 
-static char* get_pair(char *env)
+/* PRIVATE HELPERS */
+
+static void load_from_bindir(env_t *env, char *path)
 {
-  int key_len = key_length(env);
-  return read_pair(env, key_len);
+
+  struct dirent *pDirent;
+  DIR *dir;
+
+ if((dir = opendir(path)) == NULL)
+     return;
+
+    while((pDirent = readdir(dir)) != NULL)
+    {
+      if(pDirent->d_name[0] != '.')
+      {
+          /* hash table will only take unique keys so duplicates are ignored */
+          env->bin->insert(env->bin, pDirent->d_name, pDirent->d_name);
+      }
+    }
+
+    closedir(dir);
 
 }
-
 
 /**/
 
@@ -154,8 +178,30 @@ static void split_paths(env_t *env, char *paths)
 
 }
 
+/**/
 
-/* PRIVATE HELPERS */
+static char* get_key(char *env)
+{
+  int key_len = key_length(env);
+
+  char *key = (char*) malloc(key_len + 1 * sizeof(char));
+  strncpy(key, env, key_len);
+  key[key_len] = '\0';
+
+  return key;
+
+}
+
+/**/
+
+static char* get_pair(char *env)
+{
+  int key_len = key_length(env);
+  return read_pair(env, key_len);
+
+}
+
+/**/
 
 static int count_paths(char *paths)
 {
