@@ -54,7 +54,6 @@ env_t *init_env(void)
 static void load_envs(env_t *env, char **envs)
 {
 
-  env->value         = envs;
   int i              = 0;
 
   while(envs[i]) 

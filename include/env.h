@@ -34,15 +34,14 @@
 
 typedef struct env{
 
-  char     **value;
   map_t    *vars;
-  char     **paths;
-  int      paths_len;
   char     *user;
   char     *pwd;
-  void (*load) (struct env*, char**);
-  void (*free) (struct env*);
-  void (*print) (struct env*);
+  char     **paths;
+  int      paths_len;
+  void     (*load)  (struct env*, char**);
+  void     (*free)  (struct env*);
+  void     (*print) (struct env*);
 
 }env_t;
 
