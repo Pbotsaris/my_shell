@@ -38,7 +38,7 @@ static int key_length(char *env);
 env_t *init_env(void)
 {
   env_t *env       = (env_t*)malloc(sizeof(env_t));
-  env->map         = init_map();
+  env->vars        = init_map();
   env->paths       = NULL;
   env->pwd         = NULL;
   env->user        = NULL;
@@ -62,16 +62,16 @@ static void load_envs(env_t *env, char **envs)
     char *key        = get_key(envs[i]);
     char *pair       = get_pair(envs[i]);
 
-    env->map->insert(env->map, key, pair);
+    env->vars->insert(env->vars, key, pair);
     free(pair);
     free(key);
 
     i++;
   }
 
-  entry_t *path     = env->map->get(env->map, PATH_ENV);
-  entry_t *user     = env->map->get(env->map, USER_ENV);
-  entry_t *pwd      = env->map->get(env->map, PWD_ENV);
+  entry_t *path     = env->vars->get(env->vars, PATH_ENV);
+  entry_t *user     = env->vars->get(env->vars, USER_ENV);
+  entry_t *pwd      = env->vars->get(env->vars, PWD_ENV);
   env->user         = user->pair;
   env->pwd          = pwd->pair;
 
@@ -87,7 +87,7 @@ static void free_envs(env_t *env)
     free(env->paths[i]);
 
 
-  env->map->free(env->map);
+  env->vars->free(env->vars);
 
   free(env->paths);
   free(env);
@@ -97,7 +97,7 @@ static void free_envs(env_t *env)
 
 static void print_envs(env_t *env)
 {
-  env->map->print_all(env->map);
+  env->vars->print_all(env->vars);
 }
 
 
