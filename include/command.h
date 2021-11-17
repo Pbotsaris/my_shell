@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define EXIT "exit"
+#define EXIT2 "exit"
 
 typedef struct command
 {

@@ -27,6 +27,33 @@ void main_loop(char **envs)
   {
     program->print_prompt(program);
     program->readline(program);
+
+    token_t *token = program->lexer->get_next_token(program->lexer);
+
+    if(token != NULL && token->type == EXIT)
+        printf("was exit!\n");
+
+    if(token != NULL && token->type == ECHO)
+        printf("was echo!\n");
+
+    if(token != NULL && token->type == ENV)
+        printf("was ENV!\n");
+
+    if(token != NULL && token->type == VARIABLE)
+    {
+        printf("was VAR!\n");
+        free(token->value);
+    }
+
+
+    if(token != NULL && token->type == BIN)
+    {
+        printf("was BIN!\n");
+        free(token->value);
+    }
+
+    free(token);
+
   }
 
   program->free(program);

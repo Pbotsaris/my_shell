@@ -69,9 +69,9 @@ static void load_envs(env_t *env, char **envs)
     i++;
   }
 
-  entry_t *path     = env->map->get(env->map, PATH);
-  entry_t *user     = env->map->get(env->map, USER);
-  entry_t *pwd      = env->map->get(env->map, PWD);
+  entry_t *path     = env->map->get(env->map, PATH_ENV);
+  entry_t *user     = env->map->get(env->map, USER_ENV);
+  entry_t *pwd      = env->map->get(env->map, PWD_ENV);
   env->user         = user->pair;
   env->pwd          = pwd->pair;
 

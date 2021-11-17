@@ -28,15 +28,17 @@
 #include "../include/command.h"
 #include "../include/env.h"
 #include "../include/hash.h"
+#include "../include/lexer.h"
 
 
 typedef struct program
 {
-  env_t *env;
-  cmd_t *cmd;
-  void (*print_prompt) (struct program*);
-  void (*free) (struct program*);
-  void (*readline) (struct program*);
+  env_t    *env;
+  lexer_t  *lexer;
+  cmd_t    *cmd;
+  void     (*print_prompt) (struct program*);
+  void     (*free) (struct program*);
+  void     (*readline) (struct program*);
 
 }prgm_t;
 

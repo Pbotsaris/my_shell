@@ -27,9 +27,9 @@
 #include <stdio.h>
 #include "../include/hash.h"
 
-#define PATH "PATH"
-#define USER "USER"
-#define PWD "PWD"
+#define PATH_ENV "PATH"
+#define USER_ENV "USER"
+#define PWD_ENV "PWD"
 #define DELIM ":"
 
 typedef struct env{

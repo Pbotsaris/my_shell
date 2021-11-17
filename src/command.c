@@ -37,6 +37,6 @@ static bool not_exit(cmd_t *cmd)
   if(cmd->line == NULL)
     return true;
 
-  return !(strncmp(cmd->line, EXIT, cmd->len) == 0);
+  return !(strncmp(cmd->line, EXIT2, cmd->len) == 0);
 }
 
