@@ -27,14 +27,7 @@ void main_loop(char **envs)
   {
     program->print_prompt(program);
     program->readline(program);
-
-    entry_t *e = program->env->bin->get(program->env->bin, "ls");
-
-    if(e != NULL)
-     {
-      printf("ls was found. printing -> %s\n", e->pair);
-     }
-
+  
     token_t *token = program->lexer->get_next_token(program->lexer);
 
     if(token != NULL && token->type == EXIT)
@@ -54,7 +47,7 @@ void main_loop(char **envs)
 
     if(token != NULL && token->type == PASS_THROUGH)
     {
-        printf("was WAS PASS THROUGH: %s!\n", token->value);
+        printf("was WAS PASS THROUGH:!\n");
         free(token->value);
     }
 
