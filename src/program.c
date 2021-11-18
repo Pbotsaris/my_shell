@@ -34,6 +34,7 @@ prgm_t *init_program(char **envs)
   program->env->load(program->env, envs);
 
   return program;
+
 }
 
 /**/
@@ -47,6 +48,7 @@ static void free_program(prgm_t *program)
   free(program->cmd->line);
   free(program->cmd);
   free(program);
+
 }
 
 /**/

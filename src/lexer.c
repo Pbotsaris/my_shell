@@ -27,14 +27,15 @@ static token_t *first_token(lexer_t *lexer);
 static token_t *following_tokens(lexer_t *lexer);
 
 /* PRIVATE HELPERS */
-static bool has_more_tokens(lexer_t *lexer);
-static token_t *do_bin(char* cmd, int len);
+static token_t *do_passthrough(char* cmd, int len);
 static token_t *do_var(char* cmd, int len);
-static void add_token_value(token_t *token, char* cmd, int len);
+static token_t *token_with_value(char *cmd, int len, type_t type);
 static token_t *create_token(type_t type);
+static void add_token_value(token_t *token, char* cmd, int len);
 static int extract_command(lexer_t *lexer, char *cmd);
 
 /* CONDITIONALS */
+static bool has_more_tokens(lexer_t *lexer);
 static bool is_quote(char *line, int cursor);
 static bool is_flag(char *line, int cursor);
 static bool is_doubleflag(char *line, int cursor);
@@ -68,14 +69,12 @@ lexer_t *init_lexer()
   lexer->get_next_token   = get_next_token;
 
   return lexer;
-
 }
 
 /* PUBLIC METHODS */
 
 static void load(lexer_t *lexer, char *cmd)
 {
-
   lexer->cursor            =  0;
   lexer->len               = strlen(cmd);
   lexer->line              = (char*)malloc((lexer->len + 1) * sizeof(char));
@@ -84,7 +83,6 @@ static void load(lexer_t *lexer, char *cmd)
   strncpy(lexer->line, cmd, lexer->len);
    
    lexer->line[lexer->len] = '\0';
-
 }
 
 static token_t *get_next_token(lexer_t *lexer)
@@ -148,7 +146,11 @@ static token_t *first_token(lexer_t *lexer)
     token = do_var(cmd, len);
 
   else
-    token = do_bin(cmd, len);
+  {
+    /* pass throughs return whole comd */
+    token = do_passthrough(lexer->line, lexer->len);
+    lexer->cursor = lexer->len;
+  }
 
   return token;
 }
@@ -173,8 +175,6 @@ static token_t *following_tokens(lexer_t *lexer)
   else if(is_doubleflag(lexer->line, lexer->cursor))
     token =create_token(DOUBLE_FLAG);
 
-//  else if(is_var_declaration(lexer->line, lexer->cursor))
-
   else if((is_whitespace(lexer->line, lexer->cursor)))
   {
     lexer->cursor++;
@@ -187,28 +187,29 @@ static token_t *following_tokens(lexer_t *lexer)
 
 /* PRIVATE HELPERS */
 
-static token_t *do_bin(char* cmd, int len)
+static token_t *do_passthrough(char* cmd, int len)
 {
-
-  token_t *token      = create_token(BIN);
-  add_token_value(token, cmd, len);
-  return token;
+  return token_with_value(cmd, len, PASS_THROUGH);
 
 }
 
 static token_t *do_var(char* cmd, int len)
 {
+  return token_with_value(cmd, len, VARIABLE);
+}
 
-  token_t *token = create_token(VARIABLE);
+static token_t *token_with_value(char *cmd, int len, type_t type)
+{
+  token_t *token = create_token(type);
   add_token_value(token, cmd, len);
   return token;
-
 }
 
 static void add_token_value(token_t *token, char* cmd, int len)
 {
   token->value = (char*)malloc((len + 1) * sizeof(char));
   strncpy(token->value, cmd, len);
+  token->value[len] = '\0';
 }
 
 
@@ -216,11 +217,9 @@ static token_t *create_token(type_t type)
 {
   token_t *token = (token_t*) malloc(sizeof(token_t));
   token->type = type;
-  /* value only used with binary */
+  /* value is only stored in some cases. See func down stream  */
   token->value = NULL;
-
-  printf("token type: %d\n", token->type);
-
+  
   return token;
 }
 
@@ -264,8 +263,6 @@ static bool is_others(char *line, int cursor)              { return isalpha(line
 
 static bool is_var_assignment(char *line, int len)
 {
-
-
   if(!(isalpha(line[0]))) 
      return false;
 

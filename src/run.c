@@ -52,9 +52,9 @@ void main_loop(char **envs)
         free(token->value);
     }
 
-    if(token != NULL && token->type == BIN)
+    if(token != NULL && token->type == PASS_THROUGH)
     {
-        printf("was BIN!\n");
+        printf("was WAS PASS THROUGH: %s!\n", token->value);
         free(token->value);
     }
 

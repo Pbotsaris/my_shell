@@ -36,6 +36,7 @@
 
 #include <ctype.h>
 typedef enum type {
+  /* Builtins */
   ECHO,                      /* 00 */
   CD,                        /* 01 */
   SETENV,                    /* 02 */
@@ -44,7 +45,9 @@ typedef enum type {
   PWD,                       /* 05 */
   EXIT,                      /* 06 */
   WHICH,                     /* 07 */
-  BIN,                       /* 08 */
+  /* execve */
+  PASS_THROUGH,              /* 08 */
+  /* syntax */
   LITERAL,                   /* 09 */
   ARGUMENT,                  /* 10 */
   VARIABLE,                  /* 11 */
