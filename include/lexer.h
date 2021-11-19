@@ -50,11 +50,12 @@ typedef enum type {
   /* syntax */
   LITERAL,                   /* 09 */
   ARGUMENT,                  /* 10 */
-  VARIABLE,                  /* 11 */
-  ASSIGN_OPERATOR,           /* 12 */
-  FLAG,                      /* 13 */
+  VARIABLE_ASSIGN,           /* 11 */
+  VARIABLE,                  /* 12 */
+  ASSIGN_OPERATOR,           /* 13 */
+  FLAG,                      /* 14 */
   DOUBLE_FLAG,               /* 14 */
-  QUOTE,                     /* 15 */
+  QUOTE,                     /* 16 */
 }type_t;
 typedef struct token
 {
