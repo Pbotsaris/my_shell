@@ -274,6 +274,7 @@ static int extract_value(lexer_t *lexer, type_t type, char *buffer)
   return i;
 }
 
+
 /* CODITIONALS */
 
 static bool has_more_tokens(lexer_t *lexer)                { return lexer->cursor < (int)lexer->len; }
@@ -291,7 +292,7 @@ static bool is_flag(char *line, int cursor)                { return line[cursor]
 static bool is_literal(char *line, int cursor)             { return line[cursor - 1] == '"' || line[cursor - 1] == '=';} 
 static bool is_doubleflag(char *line, int cursor)          { return line[cursor] == '-' && line[cursor + 1] == '-' && isalpha(line[cursor + 2]);} 
 static bool is_whitespace(char *line, int cursor)          { return line[cursor] == ' ' || line[cursor] == '\t' || line[cursor] == 10;}
-static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=' && isalpha(line[cursor - 1]) && isalpha(line[cursor + 1]);} 
+static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=' && isalpha(line[cursor - 1]);} 
 static bool is_argument(char *line, int cursor)            { return isalpha(line[cursor]);} 
 static bool is_var(char *line, int cursor)                 { return line[cursor] == '$' && isalpha(line[cursor + 1]); }   
 static bool is_var_assignment(char *line, int cursor)      { return line[cursor] == '='; }
