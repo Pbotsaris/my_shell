@@ -25,7 +25,6 @@
 #define PSEP  "-"
 
 #include <editline/readline.h>
-//#include "../include/command.h"
 #include "../include/env.h"
 #include "../include/hash.h"
 #include "../include/parser.h"

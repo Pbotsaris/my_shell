@@ -30,6 +30,7 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type);
 static node_t *create_node(token_t *token);
 static void cpy_value(node_t *node, char *value);
 static bool is_argument(type_t type);
+static node_t *get_left_tail(node_t *node);
 
 parser_t *init_parser()
 {
@@ -40,6 +41,8 @@ parser_t *init_parser()
   return parser;
 
 }
+
+/**/
 
 static node_t *parse(parser_t *parser, lexer_t *lexer)
 {
@@ -56,6 +59,8 @@ static node_t *parse(parser_t *parser, lexer_t *lexer)
 
 }
 
+/**/
+
 static node_t *command(parser_t *parser, lexer_t *lexer)
 {
   if(parser->lookahead->type == PASS_THROUGH)
@@ -68,6 +73,8 @@ static node_t *command(parser_t *parser, lexer_t *lexer)
 
 }
 
+/**/
+
 static node_t *builtins(parser_t *parser, lexer_t *lexer)
 {
   node_t *root = eat(parser, lexer, parser->lookahead->type);
@@ -77,6 +84,8 @@ static node_t *builtins(parser_t *parser, lexer_t *lexer)
 
   return  root;
 }
+
+/**/
 
 static node_t *variable_assign(parser_t *parser, lexer_t *lexer)
 {
@@ -91,22 +100,24 @@ static node_t *variable_assign(parser_t *parser, lexer_t *lexer)
 
 }
 
+/**/
+
 static node_t *arguments(parser_t *parser, lexer_t *lexer)
 {
-  node_t *left = options(parser, lexer);
+  node_t *root = options(parser, lexer);
 
   while(parser->lookahead && is_argument(parser->lookahead->type))
   {
 
     /* always to the left */
-    node_t *arg = options(parser, lexer);
-    arg->left = left;
-    left = arg;
+    node_t *tail = get_left_tail(root);
+    tail->left = options(parser, lexer);
   }
 
-  return left;
+  return root;
 }
 
+/**/
 
 static node_t *options(parser_t *parser, lexer_t *lexer)
 {
@@ -126,6 +137,7 @@ static node_t *options(parser_t *parser, lexer_t *lexer)
   return NULL;
 }
 
+/**/
 
 static node_t *literal(parser_t *parser, lexer_t *lexer)
 {
@@ -140,6 +152,7 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
   return literal;
 }
 
+/**/
 
 static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
 {
@@ -173,6 +186,7 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
   return create_node(token);
 }
 
+/**/
 
 static node_t *create_node(token_t *token)
 {  
@@ -195,6 +209,21 @@ static node_t *create_node(token_t *token)
 }
 
 
+/**/
+
+static node_t *get_left_tail(node_t *node)
+{
+  node_t *temp = node;
+
+  while(temp->left)
+    temp = temp->left;
+
+  return temp;
+
+}
+
+/**/
+
 static void cpy_value(node_t *node, char *value)
 {
   size_t len          = strlen(value);
@@ -205,6 +234,7 @@ static void cpy_value(node_t *node, char *value)
 
 }
 
+/**/
 
 static bool is_argument(type_t type)
 {

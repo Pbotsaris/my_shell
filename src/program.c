@@ -22,6 +22,9 @@ static void read_line(prgm_t *program);
 static void free_program(prgm_t *program);
 static void print_prompt(prgm_t *program);
 static void exit_program(prgm_t *program);
+static void evaluate(prgm_t *program);
+static void builtins(prgm_t *program);
+static void free_ast(node_t *ast);
 
 prgm_t *init_program(char **envs)
 {
@@ -54,12 +57,11 @@ static void read_line(prgm_t *program)
   program->ast = program->parser->parse(program->parser, program->lexer);
 
   if(program->ast->type == EXIT)
-  {
-    exit_program(program);
-    free(program->ast);
-  }
-
+     exit_program(program);
+   
   add_history(program->cmd->line);
+
+  free_ast(program->ast);
   free(temp);
 
   if(lexer_line != NULL)
@@ -68,13 +70,33 @@ static void read_line(prgm_t *program)
 
 /**/
 
+static void evaluate(prgm_t *program)
+{
+  switch(program->ast->type)
+  {
+    case PASS_THROUGH:
+      printf("fork and execute!\n");
+      return;
+
+    case ASSIGN_OPERATOR:
+      printf("assign env vars!\n");
+      return;
+
+    default:
+      printf("execute buildins\n");
+  }
+}
+
+
+/**/
+
 static void free_program(prgm_t *program)
 {
   program->env->free(program->env);
 
   free(program->lexer->line);
-  free(program->parser);
   free(program->lexer);
+  free(program->parser);
   free(program->cmd->line);
   free(program->cmd);
   free(program);
@@ -92,9 +114,59 @@ static void print_prompt(prgm_t *program)
 
 }
 
-/**/
+/* PRIVATE */
+
+static void builtins(prgm_t *program)
+{
+  switch(program->ast->type)
+  {
+    case ECHO:
+      printf("execute echo\n");
+      return;
+
+    case CD:
+      printf("execute CD\n");
+      return;
+
+    case SETENV:
+      printf("execute SETENV\n");
+      return;
+
+    case UNSETENV:
+      printf("execute SETENV\n");
+      return;
+    case EXIT:
+      printf("execute SETENV\n");
+      return;
+
+    case WHICH:
+      printf("execute SETENV\n");
+      return;
+
+    default:
+      printf("command not found\n");
+  }
+}
+
 
 static void exit_program(prgm_t *program)
 {
   program->is_exit = true;
 }
+
+
+static void free_ast(node_t *ast)
+{
+  if(ast == NULL)
+    return;
+
+  free_ast(ast->left);
+  free_ast(ast->right);
+
+  if(ast->value)
+    free(ast->value);
+
+  free(ast);
+
+}
+
