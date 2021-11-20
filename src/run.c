@@ -27,10 +27,9 @@ void main_loop(char **envs)
   {
     program->print_prompt(program);
     program->readline(program);
+  }
 
     program->free(program);
-
-  }
 }
 
 

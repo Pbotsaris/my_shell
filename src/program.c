@@ -68,8 +68,8 @@ static void read_line(prgm_t *program)
 
   if(program->ast->type == EXIT)
   {
-      exit_program(program);
-      free(program->ast);
+    exit_program(program);
+    free(program->ast);
   }
 
   add_history(program->cmd->line);
