@@ -22,48 +22,35 @@ void main_loop(char **envs)
 {
 
   prgm_t *program = init_program(envs);
- 
-  while (program->cmd->not_exit(program->cmd))
+
+  while (!program->is_exit)
   {
     program->print_prompt(program);
     program->readline(program);
-
-    entry_t *e = program->env->bin->get(program->env->bin, "ls");
-
-    if(e != NULL)
-     {
-      printf("ls was found. printing -> %s\n", e->pair);
-     }
-
-    token_t *token = program->lexer->get_next_token(program->lexer);
-
-    if(token != NULL && token->type == EXIT)
-        printf("was exit!\n");
-
-    if(token != NULL && token->type == ECHO)
-        printf("was echo!\n");
-
-    if(token != NULL && token->type == ENV)
-        printf("was ENV!\n");
-
-    if(token != NULL && token->type == VARIABLE)
-    {
-        printf("was VAR!\n");
-        free(token->value);
-    }
-
-    if(token != NULL && token->type == BIN)
-    {
-        printf("was BIN!\n");
-        free(token->value);
-    }
-
-    free(token);
-
   }
 
-  program->free(program);
-
+    program->free(program);
 }
 
 
+
+
+
+//   token_t *token = program->lexer->get_next_token(program->lexer);
+//    printf("%d, %s\n", token->type, token->value); 
+//    if(token->value)
+//        free(token->value);
+//
+//    free(token);
+//
+//    token = program->lexer->get_next_token(program->lexer);
+//    printf("%d, %s\n", token->type, token->value); 
+//    if(token->value)
+//        free(token->value);
+//
+//    free(token);
+//  
+//    token = program->lexer->get_next_token(program->lexer);
+//    if(token == NULL)
+//      printf("token was null!");
+// 

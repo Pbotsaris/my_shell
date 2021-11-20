@@ -36,6 +36,7 @@
 
 #include <ctype.h>
 typedef enum type {
+  /* Builtins */
   ECHO,                      /* 00 */
   CD,                        /* 01 */
   SETENV,                    /* 02 */
@@ -44,14 +45,17 @@ typedef enum type {
   PWD,                       /* 05 */
   EXIT,                      /* 06 */
   WHICH,                     /* 07 */
-  BIN,                       /* 08 */
+  /* execve */
+  PASS_THROUGH,              /* 08 */
+  /* syntax */
   LITERAL,                   /* 09 */
   ARGUMENT,                  /* 10 */
-  VARIABLE,                  /* 11 */
-  ASSIGN_OPERATOR,           /* 12 */
-  FLAG,                      /* 13 */
+  VARIABLE_ASSIGN,           /* 11 */
+  VARIABLE,                  /* 12 */
+  ASSIGN_OPERATOR,           /* 13 */
+  FLAG,                      /* 14 */
   DOUBLE_FLAG,               /* 14 */
-  QUOTE,                     /* 15 */
+  QUOTE,                     /* 16 */
 }type_t;
 typedef struct token
 {
