@@ -15,11 +15,12 @@
  *
  * =====================================================================================
  */
+
 #include "../include/program.h"
 
+static void read_line(prgm_t *program);
 static void free_program(prgm_t *program);
 static void print_prompt(prgm_t *program);
-static void read_line(prgm_t *program);
 static void exit_program(prgm_t *program);
 
 prgm_t *init_program(char **envs)
@@ -33,25 +34,11 @@ prgm_t *init_program(char **envs)
   program->print_prompt     = print_prompt;
   program->readline         = read_line;
   program->is_exit          = false;
-  program->cmd->line         = NULL;
+  program->cmd->line        = NULL;
 
   program->env->load(program->env, envs);
 
   return program;
-}
-
-/**/
-
-static void free_program(prgm_t *program)
-{
-  program->env->free(program->env);
-
-  free(program->lexer->line);
-  free(program->parser);
-  free(program->lexer);
-  free(program->cmd->line);
-  free(program->cmd);
-  free(program);
 }
 
 /**/
@@ -81,6 +68,20 @@ static void read_line(prgm_t *program)
 
 /**/
 
+static void free_program(prgm_t *program)
+{
+  program->env->free(program->env);
+
+  free(program->lexer->line);
+  free(program->parser);
+  free(program->lexer);
+  free(program->cmd->line);
+  free(program->cmd);
+  free(program);
+}
+
+/**/
+
 static void print_prompt(prgm_t *program) 
 {
   /* update pwd at every command in case of cd */
@@ -93,11 +94,7 @@ static void print_prompt(prgm_t *program)
 
 /**/
 
-
 static void exit_program(prgm_t *program)
 {
   program->is_exit = true;
 }
-
-
-
