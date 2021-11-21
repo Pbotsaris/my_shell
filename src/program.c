@@ -155,7 +155,7 @@ static void builtins(prgm_t *program)
 
 static void echo(prgm_t *program)
 {
-  /* when not a binary, always take left */
+  /* when not a binary expression, always take left */
   node_t *root = program->ast->left;
   node_t *literal;
 
@@ -163,6 +163,14 @@ static void echo(prgm_t *program)
   {
     if(root->type == LITERAL || root->type == ARGUMENT || root->type == WHITESPACE)
       printf("%s", root->value); 
+
+    if(root->type == VARIABLE)
+    {
+      entry_t *var = program->env->vars->get(program->env->vars, root->value);
+
+      if(var)
+         printf("%s", var->pair);
+    }
 
     root = root->left;
   }

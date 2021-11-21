@@ -155,12 +155,20 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
     return eat(parser, lexer, LITERAL);
 
   eat(parser, lexer, QUOTE);
-  node_t  *literal = eat(parser, lexer, LITERAL);
+
+  node_t *node = NULL;
+
+  if(parser->lookahead && parser->lookahead->type == LITERAL)
+    node = eat(parser, lexer, LITERAL);
+
+  if(parser->lookahead && parser->lookahead->type == VARIABLE)
+    node = eat(parser, lexer, VARIABLE);
+
   eat(parser, lexer, QUOTE);
 
   //  printf("l\n");
 
-  return literal;
+  return node;
 }
 
 /**/
