@@ -56,8 +56,8 @@ static void read_line(prgm_t *program)
   program->lexer->load(program->lexer, program->cmd->line);
   program->ast = program->parser->parse(program->parser, program->lexer);
 
-  if(program->ast->type == EXIT)
-     exit_program(program);
+
+  evaluate(program);
    
   add_history(program->cmd->line);
 
@@ -83,7 +83,7 @@ static void evaluate(prgm_t *program)
       return;
 
     default:
-      printf("execute buildins\n");
+      builtins(program);
   }
 }
 
@@ -128,15 +128,19 @@ static void builtins(prgm_t *program)
       printf("execute CD\n");
       return;
 
+   case ENV:
+      printf("execute CD\n");
+      return;
+
     case SETENV:
       printf("execute SETENV\n");
       return;
 
     case UNSETENV:
-      printf("execute SETENV\n");
+      printf("execute UNSETENV\n");
       return;
     case EXIT:
-      printf("execute SETENV\n");
+     exit_program(program);
       return;
 
     case WHICH:
@@ -144,7 +148,7 @@ static void builtins(prgm_t *program)
       return;
 
     default:
-      printf("command not found\n");
+      printf("zsh: command not found\n");
   }
 }
 
