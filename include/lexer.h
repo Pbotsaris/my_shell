@@ -56,7 +56,9 @@ typedef enum type {
   FLAG,                      /* 14 */
   DOUBLE_FLAG,               /* 14 */
   QUOTE,                     /* 16 */
+  WHITESPACE,                /* 17 */
 }type_t;
+
 typedef struct token
 {
   char  *value;
@@ -69,11 +71,14 @@ typedef struct lexer
  char *line;
  size_t len;
  int cursor;
- bool is_first;
+ bool is_first;          /* first handle commands then arguments */
+ bool is_echo;           /* echo whitespaces get special treatment. tracks if was echo */
  void (*load) (struct lexer*, char*);
  token_t *(*get_next_token) (struct lexer*);
 
 }lexer_t;
+
+typedef int (fpointer_t)(lexer_t*, type_t, char*);
 
 
 lexer_t *init_lexer();

@@ -24,6 +24,7 @@ static void print_prompt(prgm_t *program);
 static void exit_program(prgm_t *program);
 static void evaluate(prgm_t *program);
 static void builtins(prgm_t *program);
+static void echo(prgm_t *program);
 static void free_ast(node_t *ast);
 
 prgm_t *init_program(char **envs)
@@ -121,7 +122,7 @@ static void builtins(prgm_t *program)
   switch(program->ast->type)
   {
     case ECHO:
-      printf("execute echo\n");
+      echo(program);
       return;
 
     case CD:
@@ -152,6 +153,23 @@ static void builtins(prgm_t *program)
   }
 }
 
+static void echo(prgm_t *program)
+{
+  /* when not a binary, always take left */
+  node_t *root = program->ast->left;
+  node_t *literal;
+
+  while(root)
+  {
+    if(root->type == LITERAL || root->type == ARGUMENT || root->type == WHITESPACE)
+      printf("%s", root->value); 
+
+    root = root->left;
+  }
+
+  printf("\n"); 
+
+}
 
 static void exit_program(prgm_t *program)
 {

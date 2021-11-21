@@ -39,7 +39,6 @@ parser_t *init_parser()
   parser->parse           = parse;
 
   return parser;
-
 }
 
 /**/
@@ -108,6 +107,7 @@ static node_t *arguments(parser_t *parser, lexer_t *lexer)
 
   while(parser->lookahead && is_argument(parser->lookahead->type))
   {
+   // printf("got stuck: type: %d\n", parser->lookahead->type);
 
     /* always to the left */
     node_t *tail = get_left_tail(root);
@@ -134,6 +134,15 @@ static node_t *options(parser_t *parser, lexer_t *lexer)
   if(parser->lookahead->type == QUOTE)
     return literal(parser, lexer);
 
+  if(parser->lookahead->type == LITERAL)
+    return literal(parser, lexer);
+
+  if(parser->lookahead->type == VARIABLE)
+    return eat(parser, lexer, VARIABLE);
+
+  if(parser->lookahead->type == WHITESPACE)
+    return eat(parser, lexer, WHITESPACE);
+
   return NULL;
 }
 
@@ -146,8 +155,10 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
     return eat(parser, lexer, LITERAL);
 
   eat(parser, lexer, QUOTE);
-  node_t *literal = eat(parser, lexer, LITERAL);
+  node_t  *literal = eat(parser, lexer, LITERAL);
   eat(parser, lexer, QUOTE);
+
+  //  printf("l\n");
 
   return literal;
 }
@@ -175,6 +186,7 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
   }
 
   parser->lookahead = lexer->get_next_token(lexer);
+
 
   /* do not return a tree node for quote */
   if(type == QUOTE)
@@ -238,6 +250,6 @@ static void cpy_value(node_t *node, char *value)
 
 static bool is_argument(type_t type)
 {
-  return type == ARGUMENT || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL;
+  return type == WHITESPACE || type == ARGUMENT || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL || type == VARIABLE;
 
 }
