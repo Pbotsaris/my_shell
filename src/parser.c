@@ -23,14 +23,17 @@ static node_t *command(parser_t *parser, lexer_t *lexer);
 static node_t *builtins(parser_t *parser, lexer_t *lexer);
 static node_t *variable_assign(parser_t *parser, lexer_t *lexer);
 static node_t *arguments(parser_t *parse, lexer_t *lexer);
+static node_t *quotes(parser_t *parser, lexer_t *lexer);
 static node_t *literal(parser_t *parser, lexer_t *lexer);
 static node_t *options(parser_t *parser, lexer_t *lexer);
 
 static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type);
 static node_t *create_node(token_t *token);
 static void cpy_value(node_t *node, char *value);
-static bool is_argument(type_t type);
 static node_t *get_left_tail(node_t *node);
+
+static bool is_literal(type_t type);
+static bool is_argument(type_t type);
 
 parser_t *init_parser()
 {
@@ -132,10 +135,10 @@ static node_t *options(parser_t *parser, lexer_t *lexer)
     return eat(parser, lexer, DOUBLE_FLAG);
 
   if(parser->lookahead->type == QUOTE)
-    return literal(parser, lexer);
+    return quotes(parser, lexer);
 
   if(parser->lookahead->type == LITERAL)
-    return literal(parser, lexer);
+    return eat(parser, lexer, LITERAL);
 
   if(parser->lookahead->type == VARIABLE)
     return eat(parser, lexer, VARIABLE);
@@ -148,28 +151,50 @@ static node_t *options(parser_t *parser, lexer_t *lexer)
 
 /**/
 
-static node_t *literal(parser_t *parser, lexer_t *lexer)
+static node_t *quotes(parser_t *parser, lexer_t *lexer)
 {
 
-  if(parser->lookahead && parser->lookahead->type == LITERAL)
-    return eat(parser, lexer, LITERAL);
-
   eat(parser, lexer, QUOTE);
-
-  node_t *node = NULL;
-
-  if(parser->lookahead && parser->lookahead->type == LITERAL)
-    node = eat(parser, lexer, LITERAL);
-
-  if(parser->lookahead && parser->lookahead->type == VARIABLE)
-    node = eat(parser, lexer, VARIABLE);
-
+  node_t *node = literal(parser, lexer);
   eat(parser, lexer, QUOTE);
 
   //  printf("l\n");
 
   return node;
 }
+
+static node_t *literal(parser_t *parser, lexer_t *lexer)
+{
+  node_t *literal = NULL;
+  node_t *root    = NULL;
+  node_t *tail    = NULL;
+
+  while(parser->lookahead && is_literal(parser->lookahead->type))
+  {
+  if(parser->lookahead && parser->lookahead->type == LITERAL)
+      literal = eat(parser, lexer, LITERAL);
+
+  else if(parser->lookahead && parser->lookahead->type == VARIABLE)
+     literal = eat(parser, lexer, VARIABLE);
+
+  else if(parser->lookahead && parser->lookahead->type == WHITESPACE)
+     literal = eat(parser, lexer, WHITESPACE);
+
+   if(root)
+   {
+      tail = get_left_tail(root);
+      tail->left = literal;
+   }
+   else
+     root = literal;
+
+  }
+
+  return root;
+}
+
+
+
 
 /**/
 
@@ -259,5 +284,14 @@ static void cpy_value(node_t *node, char *value)
 static bool is_argument(type_t type)
 {
   return type == WHITESPACE || type == ARGUMENT || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL || type == VARIABLE;
+}
+
+
+static bool is_literal(type_t type)
+{
+
+  return type == VARIABLE || type == LITERAL || type == WHITESPACE;
+
 
 }
+
