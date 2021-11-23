@@ -161,7 +161,7 @@ static void echo(prgm_t *program)
 
   while(root)
   {
-    if(root->type == LITERAL || root->type == ARGUMENT || root->type == WHITESPACE)
+    if(root->type == LITERAL || root->type == WHITESPACE)
       printf("%s", root->value); 
 
     if(root->type == VARIABLE)
@@ -171,6 +171,10 @@ static void echo(prgm_t *program)
       if(var)
          printf("%s", var->pair);
     }
+
+    if(root->type == LINE_BREAK)
+        printf("\n"); 
+    
 
     root = root->left;
   }

@@ -17,6 +17,7 @@
  */
 #include "../include/lexer.h"
 
+// TODO: WORK ON LINE BREAK. IMPLMENETED EVERYWHERE NOT NOT WORKING YET. MAYBE CONDITIONAL IS NOT WORKING
 
 /* PUBLIC METHODS */
 static void load(lexer_t *lexer, char *cmd);
@@ -47,7 +48,6 @@ static bool is_doubleflag(char *line, int cursor);
 static bool is_whitespace(char *line, int cursor);
 static bool is_assign_operator(char *line, int cursor);
 static bool is_literal(char *line, int cursor); 
-static bool is_argument(char *line, int cursor);
 static bool is_echo(char *cmd, int len);    
 static bool is_cd(char *cmd, int len);      
 static bool is_setenv(char *cmd, int len);  
@@ -59,7 +59,6 @@ static bool is_exit(char *cmd, int len);
 static bool is_var_assignment(char *line, int len);
 static bool is_var(char *line, int cursor);
 static bool is_line_break(char *line, int cursor);      
-
 
 /* PUBLIC INITIALIZER */
 
@@ -203,13 +202,16 @@ static token_t *next_tokens(lexer_t *lexer)
   else if (is_literal(lexer->line, lexer->cursor))
     return tokenize(lexer, LITERAL, extract_value);
 
-  else if(is_argument(lexer->line, lexer->cursor))
-    return tokenize(lexer, ARGUMENT, extract_value);
-
   /* tokenize whisspace when echo */
 
   else if(lexer->is_echo && is_whitespace(lexer->line, lexer->cursor))
     return tokenize(lexer, WHITESPACE, extract_whitespaces);
+
+
+  /* tokenize linebreaks with echo */
+
+  else if(lexer->is_echo && is_line_break(lexer->line, lexer->cursor))
+    return tokenize(lexer, LINE_BREAK, extract_value);
 
   else if((is_whitespace(lexer->line, lexer->cursor)))
   {
@@ -332,12 +334,16 @@ static bool is_which(char *cmd, int len)                   { return strncmp(cmd,
 static bool is_exit(char *cmd, int len)                    { return strncmp(cmd, CMD_EXIT , len) == 0; }
 static bool is_quote(char *line, int cursor)               { return line[cursor] == '"';} 
 static bool is_flag(char *line, int cursor)                { return line[cursor] == '-' && isalpha(line[cursor + 1]);} 
-static bool is_literal(char *line, int cursor)             { return line[cursor] != ' ' && ((line[cursor - 1] == '"' || line[cursor - 1] == '=') || line[cursor - 1] == ' ');} 
 static bool is_doubleflag(char *line, int cursor)          { return line[cursor] == '-' && line[cursor + 1] == '-' && isalpha(line[cursor + 2]);} 
 static bool is_whitespace(char *line, int cursor)          { return line[cursor] == ' ' || line[cursor] == '\t' || line[cursor] == 10;}
 static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=' && isalpha(line[cursor - 1]);} 
-static bool is_argument(char *line, int cursor)            { return isalpha(line[cursor]);} 
 static bool is_var(char *line, int cursor)                 { return line[cursor] == '$' && isalpha(line[cursor + 1]); }   
 static bool is_var_assignment(char *line, int cursor)      { return line[cursor] == '='; }
 static bool is_line_break(char *line, int cursor)          { return line[cursor] == '\\' && line[cursor + 1] == 'n' ;}
 
+static bool is_literal(char *line, int cursor)   
+{
+  return line[cursor] != ' '
+         && line[cursor] != '\\' 
+         && ((line[cursor - 1] == '"' || line[cursor - 1] == '=') || line[cursor - 1] == ' ');
+} 

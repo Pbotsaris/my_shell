@@ -125,9 +125,6 @@ static node_t *arguments(parser_t *parser, lexer_t *lexer)
 static node_t *options(parser_t *parser, lexer_t *lexer)
 {
 
-  if(parser->lookahead->type == ARGUMENT)
-    return eat(parser, lexer, ARGUMENT);
-
   if(parser->lookahead->type == FLAG)
     return eat(parser, lexer, FLAG);
 
@@ -158,10 +155,10 @@ static node_t *quotes(parser_t *parser, lexer_t *lexer)
   node_t *node = literal(parser, lexer);
   eat(parser, lexer, QUOTE);
 
-  //  printf("l\n");
-
   return node;
 }
+
+/**/
 
 static node_t *literal(parser_t *parser, lexer_t *lexer)
 {
@@ -171,14 +168,18 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
 
   while(parser->lookahead && is_literal(parser->lookahead->type))
   {
-  if(parser->lookahead && parser->lookahead->type == LITERAL)
+
+  if(parser->lookahead->type == LITERAL)
       literal = eat(parser, lexer, LITERAL);
 
-  else if(parser->lookahead && parser->lookahead->type == VARIABLE)
+  else if(parser->lookahead->type == VARIABLE)
      literal = eat(parser, lexer, VARIABLE);
 
-  else if(parser->lookahead && parser->lookahead->type == WHITESPACE)
+  else if(parser->lookahead->type == WHITESPACE)
      literal = eat(parser, lexer, WHITESPACE);
+
+  else if(parser->lookahead->type == LINE_BREAK)
+     literal = eat(parser, lexer, LINE_BREAK);
 
    if(root)
    {
@@ -192,8 +193,6 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
 
   return root;
 }
-
-
 
 
 /**/
@@ -253,7 +252,6 @@ static node_t *create_node(token_t *token)
   return node;
 }
 
-
 /**/
 
 static node_t *get_left_tail(node_t *node)
@@ -283,14 +281,14 @@ static void cpy_value(node_t *node, char *value)
 
 static bool is_argument(type_t type)
 {
-  return type == WHITESPACE || type == ARGUMENT || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL || type == VARIABLE;
+  return type == WHITESPACE || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL || type == VARIABLE;
 }
 
 
 static bool is_literal(type_t type)
 {
 
-  return type == VARIABLE || type == LITERAL || type == WHITESPACE;
+  return type == VARIABLE || type == LITERAL || type == WHITESPACE || type == LINE_BREAK;
 
 
 }

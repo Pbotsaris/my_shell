@@ -49,14 +49,14 @@ typedef enum type {
   PASS_THROUGH,              /* 08 */
   /* syntax */
   LITERAL,                   /* 09 */
-  ARGUMENT,                  /* 10 */
-  VARIABLE_ASSIGN,           /* 11 */
-  VARIABLE,                  /* 12 */
-  ASSIGN_OPERATOR,           /* 13 */
-  FLAG,                      /* 14 */
+  VARIABLE_ASSIGN,           /* 10 */
+  VARIABLE,                  /* 11 */
+  ASSIGN_OPERATOR,           /* 12 */
+  FLAG,                      /* 13 */
   DOUBLE_FLAG,               /* 14 */
-  QUOTE,                     /* 16 */
-  WHITESPACE,                /* 17 */
+  QUOTE,                     /* 15 */
+  WHITESPACE,                /* 16 */
+  LINE_BREAK,                /* 17 */
 }type_t;
 
 typedef struct token
