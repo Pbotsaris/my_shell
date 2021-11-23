@@ -24,6 +24,7 @@ static void print_prompt(prgm_t *program);
 static void exit_program(prgm_t *program);
 static void evaluate(prgm_t *program);
 static void builtins(prgm_t *program);
+static void assign_var(prgm_t *program);
 static void echo(prgm_t *program);
 static void free_ast(node_t *ast);
 
@@ -59,7 +60,7 @@ static void read_line(prgm_t *program)
 
 
   evaluate(program);
-   
+
   add_history(program->cmd->line);
 
   free_ast(program->ast);
@@ -80,7 +81,7 @@ static void evaluate(prgm_t *program)
       return;
 
     case ASSIGN_OPERATOR:
-      printf("assign env vars!\n");
+      assign_var(program);
       return;
 
     default:
@@ -117,6 +118,11 @@ static void print_prompt(prgm_t *program)
 
 /* PRIVATE */
 
+static void assign_var(prgm_t *program)
+{
+    program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
+}
+
 static void builtins(prgm_t *program)
 {
   switch(program->ast->type)
@@ -129,8 +135,8 @@ static void builtins(prgm_t *program)
       printf("execute CD\n");
       return;
 
-   case ENV:
-      printf("execute CD\n");
+    case ENV:
+      printf("execute ENV\n");
       return;
 
     case SETENV:
@@ -141,7 +147,7 @@ static void builtins(prgm_t *program)
       printf("execute UNSETENV\n");
       return;
     case EXIT:
-     exit_program(program);
+      exit_program(program);
       return;
 
     case WHICH:
@@ -169,12 +175,12 @@ static void echo(prgm_t *program)
       entry_t *var = program->env->vars->get(program->env->vars, root->value);
 
       if(var)
-         printf("%s", var->pair);
+        printf("%s", var->pair);
     }
 
     if(root->type == LINE_BREAK)
-        printf("\n"); 
-    
+      printf("\n"); 
+
 
     root = root->left;
   }
