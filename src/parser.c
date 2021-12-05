@@ -116,7 +116,6 @@ static node_t *operands(parser_t *parser, lexer_t *lexer)
 
   while(parser->lookahead && is_argument(parser->lookahead->type))
   {
-   // printf("got stuck: type: %d\n", parser->lookahead->type);
 
     /* always to the left */
     node_t *tail     = get_left_tail(root);
@@ -145,6 +144,9 @@ static node_t *arguments(parser_t *parser, lexer_t *lexer)
 
   if(parser->lookahead->type == VARIABLE)
     return eat(parser, lexer, VARIABLE);
+
+  if(parser->lookahead->type == VARIABLE_ASSIGN)
+      return variable_assign(parser, lexer);
 
   if(parser->lookahead->type == WHITESPACE)
     return eat(parser, lexer, WHITESPACE);
@@ -286,7 +288,7 @@ static void cpy_value(node_t *node, char *value)
 
 static bool is_argument(type_t type)
 {
-  return type == WHITESPACE || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL || type == VARIABLE;
+  return type == WHITESPACE || type == FLAG || type == DOUBLE_FLAG || type == QUOTE || type == LITERAL || type == VARIABLE || type == VARIABLE_ASSIGN;
 }
 
 

@@ -27,6 +27,8 @@ static void builtins(prgm_t *program);
 static void assign_var(prgm_t *program);
 static void echo(prgm_t *program);
 static void cd(prgm_t *program);
+static void env(prgm_t *program);
+static void eval_env(node_t *root);
 static void free_ast(node_t *ast);
 
 prgm_t *init_program(char **envs)
@@ -151,7 +153,7 @@ static void builtins(prgm_t *program)
       return;
 
     case ENV:
-      printf("execute ENV\n");
+      env(program);
       return;
 
     case SETENV:
@@ -166,14 +168,12 @@ static void builtins(prgm_t *program)
       return;
 
     case WHICH:
-      printf("execute SETENV\n");
+      printf("execute WHICH\n");
       return;
-
 
     case PWD:
       printf("%s\n", program->env->pwd);
       return;
-
 
     default:
       printf("zsh: command not found\n");
@@ -190,7 +190,7 @@ static void exit_program(prgm_t *program)
 static void echo(prgm_t *program)
 {
   /* when not a binary expression, always take left */
-  node_t *root             = program->ast->left;
+  node_t *root              = program->ast->left;
 
   while(root)
   {
@@ -219,8 +219,8 @@ static void echo(prgm_t *program)
 static void cd(prgm_t *program)
 {
 
-  pathnode_t *dir_names       = split_path(program->ast->left->value);
-  entry_t *pwd                = program->env->vars->get(program->env->vars, PWD_ENV);
+  pathnode_t *dir_names   = split_path(program->ast->left->value);
+  entry_t *pwd            = program->env->vars->get(program->env->vars, PWD_ENV);
 
   if(path_exists(dir_names, pwd->pair))
   {
@@ -231,10 +231,47 @@ static void cd(prgm_t *program)
   else
     printf("No such directory\n");
 
-  //  if(program->ast->left->value)
   free_paths(dir_names);
+
+}
+
+
+static void env(prgm_t *program)
+{
+//  node_t *options = program->ast->left;
+
+  eval_env(program->ast->left);
+
+//  while(options)
+//  {
+//
+//     if(options->type == FLAG || options->type == DOUBLE_FLAG)
+//     {
+//      printf("%s\n", options->value);
+//      options = options->left;
+//     }
+//
+//  }
+
+}
+
+
+
+static void eval_env(node_t *root)
+{
+
+  if(!root)
+    return;
+
+
+  if(root->type != ASSIGN_OPERATOR)
+      printf("%s\n", root->value);
+
+  eval_env(root->left);
+  eval_env(root->right);
 
 
 }
+
 
 

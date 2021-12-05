@@ -59,6 +59,7 @@ static bool is_exit(char *cmd, int len);
 static bool is_var_assignment(char *line, int len);
 static bool is_var(char *line, int cursor);
 static bool is_line_break(char *line, int cursor);      
+static bool is_arg_assigment(char *line, int cursor);
 
 /* PUBLIC INITIALIZER */
 
@@ -125,8 +126,8 @@ static token_t *first_token(lexer_t *lexer)
 
   if(is_echo(cmd, len))
   {
-    lexer->is_echo = true;  /* for handling whitespace later */
-    skip_whitespace(lexer); /* manually skipping whitespace between echo and argunents*/
+    lexer->is_echo = true;                  /* for handling whitespace later */
+    skip_whitespace(lexer);                /* manually skipping whitespace between echo and argunents*/
     return create_token(ECHO);
   }
 
@@ -174,6 +175,9 @@ static token_t *next_tokens(lexer_t *lexer)
     lexer->cursor++;
     return create_token(QUOTE);
   }
+
+  else if(is_arg_assigment(lexer->line, lexer->cursor))
+     return tokenize(lexer, VARIABLE_ASSIGN, extract_value);
 
   else if(is_assign_operator(lexer->line, lexer->cursor))
   {
@@ -347,3 +351,27 @@ static bool is_literal(char *line, int cursor)
     && line[cursor] != '\\' 
     && ((line[cursor - 1] == '"' || line[cursor - 1] == '=') || line[cursor - 1] == ' ');
 } 
+
+static bool is_arg_assigment(char *line, int cursor)
+{
+  /* assignment cannot begin wih an assigment operator */
+
+  if(line[cursor] == '=')
+    return false;
+
+  int index = cursor;
+
+while(line[index] != '\0')
+{
+ if(line[index] == ' ')
+   break;
+
+ if(line[index] == '=')
+   return true;
+
+ index++;
+}
+
+return false;
+
+}
