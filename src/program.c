@@ -124,7 +124,6 @@ static void assign_var(prgm_t *program)
 
 }
 
-
 static void free_ast(node_t *ast)
 {
   if(ast == NULL)
@@ -169,6 +168,12 @@ static void builtins(prgm_t *program)
     case WHICH:
       printf("execute SETENV\n");
       return;
+
+
+    case PWD:
+      printf("%s\n", program->env->pwd);
+      return;
+
 
     default:
       printf("zsh: command not found\n");
