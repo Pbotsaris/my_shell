@@ -18,12 +18,13 @@
 
 #include "../include/path.h"
 
-
+/* PRIVATE FUNCTIONS */
 static void add_to_tail(pathnode_t *head, char *buffer, int buff_index);
 static pathnode_t *create_node(pathnode_t *node, char *buffer, int buff_index);
-static void free_dir_path(pathnode_t *dir_names);
 static bool dir_exists(char *dir_name, char *path);
+static int join_path(pathnode_t *dir_names, char *path, size_t plen);
 
+/* PUBLIC */
 
 pathnode_t *split_path(char *path)
 {
@@ -50,20 +51,19 @@ pathnode_t *split_path(char *path)
         add_to_tail(head, buffer, buff_index);
 
       buff_index = 0;
-
     }
-
     path_index++;
   }
 
   return head;
 }
 
+/**/
+
 bool path_exists(pathnode_t *dir_names, char *path)
 {
   if(dir_names == NULL)
     return true;
-
 
   size_t plen = strlen(path);
   size_t dlen = strlen(dir_names->value);
@@ -79,12 +79,76 @@ bool path_exists(pathnode_t *dir_names, char *path)
   else
     return false;
 
-  free_dir_path(dir_names);
+//  free_dir_path(dir_names);
 }
 
 
+void free_paths(pathnode_t *dir_names)
+{
+  pathnode_t *next;
 
-int join_path(pathnode_t *dir_names, char *path, size_t plen)
+  while(dir_names)
+  {
+    free(dir_names->value);
+    next = dir_names->next;
+    free(dir_names);
+    dir_names = next;
+  }
+}
+
+char *new_pwd(char *pwd, char *to_join)
+{
+
+  size_t pwd_len                  = strlen(pwd);
+  size_t join_len                 = strlen(to_join);
+  /* + 2 for null char and separtor */
+  size_t new_pwd_len              = pwd_len + join_len + 2;
+  char *new_pwd                   = (char*)malloc( new_pwd_len * sizeof(char));
+
+  strncpy(new_pwd, pwd, pwd_len);
+  new_pwd[pwd_len]                = '/';
+  new_pwd[pwd_len + 1]            = '\0';
+  strncat(new_pwd, to_join, new_pwd_len);
+  new_pwd[new_pwd_len - 1] = '\0';
+
+  return new_pwd;
+
+
+}
+
+
+/* PRIVATE */
+
+static bool dir_exists(char *dir_name, char *path)
+{
+  struct   dirent *dirent;
+  DIR      *dir;
+
+  if((dir = opendir(path)) == NULL)
+  {
+    printf("error: %s\n",strerror(errno));
+    return false;
+  }
+
+  while((dirent = readdir(dir)) != NULL)
+  {
+
+    if(dirent->d_type == DT_DIR && strcmp(dirent->d_name, dir_name) == 0)
+    {
+      closedir(dir);
+      return true;
+    }
+  }
+
+  closedir(dir);
+  return false;
+
+}
+
+
+/**/
+
+static int join_path(pathnode_t *dir_names, char *path, size_t plen)
 {
   int index = 0;
   path[plen++] = '/';
@@ -100,66 +164,7 @@ int join_path(pathnode_t *dir_names, char *path, size_t plen)
   return plen;
 }
 
-
-static bool dir_exists(char *dir_name, char *path)
-{
-
-  struct   dirent *dirent;
-  DIR      *dir;
-
-
-  if((dir = opendir(path)) == NULL)
-  {
-     printf("error: %s\n",strerror(errno));
-     return false;
-  }
-   
-
-  while((dirent = readdir(dir)) != NULL)
-  {
-    
-    if(dirent->d_type == DT_DIR && strcmp(dirent->d_name, dir_name) == 0)
-    {
-      closedir(dir);
-      return true;
-    }
-  }
-
-  closedir(dir);
-  return false;
-
-}
-
-void print_dir_path(pathnode_t *dir)
-{
-  if(!dir)
-    return;
-
-  pathnode_t *temp = dir;
-
-  while(temp)
-  {
-    printf("path: %s\n", temp->value);
-    temp = temp->next;
-  }
-
-}
-
-static void free_dir_path(pathnode_t *dir_names)
-{
-
-  pathnode_t *prev;
-
-  while(dir_names)
-  {
-    free(dir_names->value);
-    prev = dir_names;
-    free(dir_names);
-    dir_names = prev->next;
-  }
-
-
-}
+/**/
 
 static void add_to_tail(pathnode_t *head, char *buffer, int buff_index)
 {
@@ -179,6 +184,8 @@ static void add_to_tail(pathnode_t *head, char *buffer, int buff_index)
   }
 
 }
+
+/**/
 
 static pathnode_t *create_node(pathnode_t *node, char *buffer, int buff_index)
 {

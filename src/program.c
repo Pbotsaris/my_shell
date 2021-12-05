@@ -185,8 +185,7 @@ static void exit_program(prgm_t *program)
 static void echo(prgm_t *program)
 {
   /* when not a binary expression, always take left */
-  node_t *root = program->ast->left;
-  node_t *literal;
+  node_t *root             = program->ast->left;
 
   while(root)
   {
@@ -195,7 +194,7 @@ static void echo(prgm_t *program)
 
     if(root->type == VARIABLE)
     {
-      entry_t *var = program->env->vars->get(program->env->vars, root->value);
+      entry_t *var         = program->env->vars->get(program->env->vars, root->value);
 
       if(var)
         printf("%s", var->pair);
@@ -215,18 +214,21 @@ static void echo(prgm_t *program)
 static void cd(prgm_t *program)
 {
 
-  pathnode_t *dir_names = split_path(program->ast->left->value);
-
-  entry_t *pwd = program->env->vars->get(program->env->vars, PWD_ENV);
+  pathnode_t *dir_names       = split_path(program->ast->left->value);
+  entry_t *pwd                = program->env->vars->get(program->env->vars, PWD_ENV);
 
   if(path_exists(dir_names, pwd->pair))
   {
-    printf("found.\n");
+    char *npwd = new_pwd(pwd->pair, program->ast->left->value);
+    program->env->vars->insert(program->env->vars, PWD_ENV, npwd);
+    free(npwd);
   }
   else
-    printf("No such directory.\n");
+    printf("No such directory\n");
 
   //  if(program->ast->left->value)
+  free_paths(dir_names);
+
 
 }
 

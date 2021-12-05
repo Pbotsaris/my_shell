@@ -35,9 +35,9 @@ struct path_node *next;
 }pathnode_t;
 
 pathnode_t *split_path(char *path);
-void print_dir_path(pathnode_t *dir);
 bool path_exists(pathnode_t *dir_names, char *path);
-int join_path(pathnode_t *dir_names, char *path, size_t plen);
+void free_paths(pathnode_t *dir_names); 
+char *new_pwd(char *pwd, char *to_join);
 
 #endif
 
