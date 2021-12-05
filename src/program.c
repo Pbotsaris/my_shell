@@ -26,6 +26,7 @@ static void evaluate(prgm_t *program);
 static void builtins(prgm_t *program);
 static void assign_var(prgm_t *program);
 static void echo(prgm_t *program);
+static void cd(prgm_t *program);
 static void free_ast(node_t *ast);
 
 prgm_t *init_program(char **envs)
@@ -57,7 +58,6 @@ static void read_line(prgm_t *program)
 
   program->lexer->load(program->lexer, program->cmd->line);
   program->ast = program->parser->parse(program->parser, program->lexer);
-
 
   evaluate(program);
 
@@ -121,6 +121,22 @@ static void print_prompt(prgm_t *program)
 static void assign_var(prgm_t *program)
 {
     program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
+
+}
+
+
+static void free_ast(node_t *ast)
+{
+  if(ast == NULL)
+    return;
+
+  free_ast(ast->left);
+  free_ast(ast->right);
+
+  if(ast->value)
+    free(ast->value);
+
+  free(ast);
 }
 
 static void builtins(prgm_t *program)
@@ -132,7 +148,7 @@ static void builtins(prgm_t *program)
       return;
 
     case CD:
-      printf("execute CD\n");
+      cd(program);
       return;
 
     case ENV:
@@ -158,6 +174,13 @@ static void builtins(prgm_t *program)
       printf("zsh: command not found\n");
   }
 }
+
+
+static void exit_program(prgm_t *program)
+{
+  program->is_exit = true;
+}
+
 
 static void echo(prgm_t *program)
 {
@@ -187,26 +210,24 @@ static void echo(prgm_t *program)
 
   printf("\n"); 
 
-}
+} 
 
-static void exit_program(prgm_t *program)
+static void cd(prgm_t *program)
 {
-  program->is_exit = true;
-}
 
+  pathnode_t *dir_names = split_path(program->ast->left->value);
 
-static void free_ast(node_t *ast)
-{
-  if(ast == NULL)
-    return;
+  entry_t *pwd = program->env->vars->get(program->env->vars, PWD_ENV);
 
-  free_ast(ast->left);
-  free_ast(ast->right);
+  if(path_exists(dir_names, pwd->pair))
+  {
+    printf("found.\n");
+  }
+  else
+    printf("No such directory.\n");
 
-  if(ast->value)
-    free(ast->value);
-
-  free(ast);
+  //  if(program->ast->left->value)
 
 }
+
 

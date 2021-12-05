@@ -344,6 +344,6 @@ static bool is_line_break(char *line, int cursor)          { return line[cursor]
 static bool is_literal(char *line, int cursor)   
 {
   return line[cursor] != ' '
-         && line[cursor] != '\\' 
-         && ((line[cursor - 1] == '"' || line[cursor - 1] == '=') || line[cursor - 1] == ' ');
+    && line[cursor] != '\\' 
+    && ((line[cursor - 1] == '"' || line[cursor - 1] == '=') || line[cursor - 1] == ' ');
 } 

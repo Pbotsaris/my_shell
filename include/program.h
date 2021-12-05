@@ -28,6 +28,7 @@
 #include "../include/env.h"
 #include "../include/hash.h"
 #include "../include/parser.h"
+#include "../include/path.h"
 
 
 typedef struct cmd{
