@@ -35,6 +35,7 @@
 #include "../include/hash.h"
 #include "../include/parser.h"
 #include "../include/path.h"
+#include "../include/exec.h"
 
 #define IGNORE_SINGLE  "-i"
 #define IGNORE_DOUBLE  "--ignore-environment"
@@ -44,7 +45,6 @@
 #define NILL_DOUBLE    "--null"
 #define CDIR_SINGLE    "-C"
 #define CDIR_DOUBLE    "--chdir"
-#define MAX_ARGV_LEN   100
 
 typedef enum envflags{
   INIT,                /* 0 */
@@ -66,22 +66,6 @@ typedef struct cmd{
   ssize_t len;
 
 }cmd_t;
-
-
-/* 
- *           the exec struct holds the necessary paramenters
- *           to execute an external program with execve 
- */
-
-typedef struct exec {
-  node_t *root;                                                /* root of the ast branch to extract command to be executed by execve */
-  char *bin;                                                   /*  the bin to be executed by execve */
-  char *argv[MAX_ARGV_LEN];                                    /*  arguments for execve. MAX of 99 arguments */
-  char **envp;                                                 /*  envirioment for execve */
-
-
-}exec_t;
-
 
 /*
  *           the program struct holds all the data and functionality 

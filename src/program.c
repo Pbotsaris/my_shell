@@ -32,6 +32,7 @@ static void env(prgm_t *program);
 static envflag_t extract_flags(node_t **root);
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment);
 static void extract_command(prgm_t *program, node_t *root);
+static void restore_temp_env(prgm_t *program);
 
 static void free_ast(node_t *ast);
 
@@ -39,7 +40,7 @@ prgm_t *init_program(char **envs)
 {
   prgm_t *program           = (prgm_t*)malloc(sizeof(prgm_t));
   program->cmd              = (cmd_t*)malloc(sizeof(cmd_t));
-  program->exec             = (exec_t*)malloc(sizeof(exec_t));
+  program->exec             = init_exec();
   program->env              = init_env();
   program->lexer            = init_lexer();
   program->parser           = init_parser();
@@ -48,9 +49,6 @@ prgm_t *init_program(char **envs)
   program->readline         = read_line;
   program->is_exit          = false;
   program->cmd->line        = NULL;
-  program->exec->bin        = NULL;
-  program->exec->root       = NULL;
-  program->exec->envp       = NULL;
 
 
   program->env->load(program->env, envs);
@@ -260,16 +258,18 @@ static void env(prgm_t *program)
 
   if(flag == UNSET)
   {
-    program->env->temp_vars->destroy(program->env->temp_vars, root->value);
+    if(!program->env->temp_vars->destroy(program->env->temp_vars, root->value))
+       printf("%s does not exist in the enviroment\n", root->value);
+
     root = root->left;
   }
-
-    program->env->print_temp(program->env);
 
   /* extracts env vars assigment operands. stores new root position in program->exec->root to extract command */
   if(root && root->type == ASSIGN_OPERATOR)
     extract_env(program, root, false);
-  
+
+  program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
+
   /* if no assigment, set program->exec->root manually */
   if(!program->exec->root)
     program->exec->root = root;
@@ -278,19 +278,27 @@ static void env(prgm_t *program)
   if(program->exec->root)
     extract_command(program, program->exec->root);
 
+  program->env->print_temp(program->env);
+
+  restore_temp_env(program);
+  program->exec->free_envp(program->exec);
+
+  printf("--\n--AFTER\n--\n");
+  program->env->print_temp(program->env);
+
 }
 
 
 static envflag_t extract_flags(node_t **root)
 {
-  envflag_t flag = INIT;
+  envflag_t flag           = INIT;
 
   while(*root && ((*root)->type == FLAG || (*root)->type == DOUBLE_FLAG))
   {
     /* env takes a single option. if more flags are passed in skip remaining */
     if(flag != INIT)
     {
-      *root = (*root)->left;
+      *root                = (*root)->left;
       continue;
     }
 
@@ -319,7 +327,7 @@ static envflag_t extract_flags(node_t **root)
 
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment)
 {
-  bool was_assignment_next = false;
+  bool was_assignment_next   = false;
 
   if(!root)
     return;
@@ -348,9 +356,9 @@ static void extract_command(prgm_t *program, node_t *root)
   if(!root && !root->value)
     return;
 
-   int index          = 0; 
-   program->exec->bin = root->value;
-   root               = root->left;
+  int index             = 0; 
+  program->exec->bin    = root->value;
+  root                  = root->left;
 
   while(root)
   {
@@ -367,6 +375,26 @@ static void extract_command(prgm_t *program, node_t *root)
 
   /* last item is a null */
   program->exec->argv[index] = NULL;
+
+}
+
+
+static void restore_temp_env(prgm_t *program)
+{
+
+  char **env        = program->env->vars->to_array(program->env->vars);
+  int count         = 0;
+
+  program->env->temp_vars->destroy_all(program->env->temp_vars);
+  program->env->restore_env(program->env, env, false);
+
+  while(env[count])
+  {
+    free(env[count]);
+    count++;
+  }
+
+  free(env);
 
 }
 

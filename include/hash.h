@@ -42,6 +42,7 @@ typedef struct map {
  void            (*insert) (struct map*, char*, char*);
  entry_t        *(*get) (struct map*, char*);
  bool            (*destroy) (struct map*, char*);
+ void            (*destroy_all) (struct map*);
  void            (*free) (struct map*);
  void            (*print_all) (struct map*);
  char          **(*to_array) (struct map*);

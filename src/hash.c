@@ -22,9 +22,11 @@
 static void insert(map_t *map, char *key, char *pair);
 static entry_t *get(map_t *map, char *key);
 static bool destroy(map_t *map, char *key);
+static void destroy_all(map_t *map);
 static void print_all(map_t *map);
 static void free_map(map_t *map);
 static char **to_array(map_t *map);
+
 
 /* PRIVATE */
 static entry_t *create_entry(char *key, char *pair);
@@ -41,6 +43,7 @@ map_t *init_map(void)
   map->insert           = insert;
   map->get              = get;  
   map->destroy          = destroy;
+  map->destroy_all      = destroy_all;
   map->print_all        = print_all;
   map->free             = free_map;
   map->to_array         = to_array;
@@ -130,8 +133,11 @@ while(entry != NULL)
       map->entries[slot] = entry->next;
 
     free(entry->key);
+    entry->key = NULL;
     free(entry->pair);
+    entry->key = NULL;
     free(entry);
+    entry = NULL;
     return true;
     }
     prev = entry;
@@ -147,10 +153,10 @@ while(entry != NULL)
 
 /**/
 
-static void free_map(map_t *map)
+static void destroy_all(map_t *map)
 {
 
-  for(int i = 0; i < T_SIZE; i++)
+for(int i = 0; i < T_SIZE; i++)
   {
     entry_t *entry = map->entries[i];
     entry_t *entry_to_free;
@@ -161,18 +167,35 @@ static void free_map(map_t *map)
     while(entry != NULL)
     {
      free(entry->key);
+     entry->key = NULL;
      free(entry->pair);
+     entry->key = NULL;
 
      entry_to_free = entry;
      entry = entry->next;
 
      free(entry_to_free);
+     entry_to_free = NULL;
     }
 
+    map->entries[i] = NULL;
+
   }
+    
+
+}
+
+/**/
+
+static void free_map(map_t *map)
+{
+
+  destroy_all(map);
 
   free(map->entries);
+  map->entries = NULL;
   free(map);
+  map = NULL;
 }
 
 /**/
