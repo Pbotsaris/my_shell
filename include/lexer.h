@@ -45,18 +45,19 @@ typedef enum type {
   PWD,                       /* 05 */
   EXIT,                      /* 06 */
   WHICH,                     /* 07 */
-  /* execve */
-  PASS_THROUGH,              /* 08 */
-  /* syntax */
-  LITERAL,                   /* 09 */
-  VARIABLE_ASSIGN,           /* 10 */
-  VARIABLE,                  /* 11 */
-  ASSIGN_OPERATOR,           /* 12 */
-  FLAG,                      /* 13 */
-  DOUBLE_FLAG,               /* 14 */
-  QUOTE,                     /* 15 */
-  WHITESPACE,                /* 16 */
-  LINE_BREAK,                /* 17 */
+   /* syntax */
+  LITERAL,                   /* 08 */
+  VARIABLE_ASSIGN,           /* 09 */
+  VARIABLE,                  /* 10 */
+  ASSIGN_OPERATOR,           /* 11 */
+  FLAG,                      /* 12 */
+  DOUBLE_FLAG,               /* 13 */
+  QUOTE,                     /* 14 */
+  WHITESPACE,                /* 15 */
+  LINE_BREAK,                /* 16 */
+ /* execve */
+  PASS_THROUGH,              /* 17 */
+
 }type_t;
 
 typedef struct token

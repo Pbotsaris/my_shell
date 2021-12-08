@@ -28,13 +28,18 @@ static void assign_var(prgm_t *program);
 static void echo(prgm_t *program);
 static void cd(prgm_t *program);
 static void env(prgm_t *program);
-static void eval_env(node_t *root);
+
+static envflag_t extract_flags(node_t **root);
+static void extract_env(prgm_t *program, node_t *root, bool was_assignment);
+static void extract_command(prgm_t *program, node_t *root);
+
 static void free_ast(node_t *ast);
 
 prgm_t *init_program(char **envs)
 {
   prgm_t *program           = (prgm_t*)malloc(sizeof(prgm_t));
   program->cmd              = (cmd_t*)malloc(sizeof(cmd_t));
+  program->exec             = (exec_t*)malloc(sizeof(exec_t));
   program->env              = init_env();
   program->lexer            = init_lexer();
   program->parser           = init_parser();
@@ -43,6 +48,10 @@ prgm_t *init_program(char **envs)
   program->readline         = read_line;
   program->is_exit          = false;
   program->cmd->line        = NULL;
+  program->exec->bin        = NULL;
+  program->exec->root       = NULL;
+  program->exec->envp       = NULL;
+
 
   program->env->load(program->env, envs);
 
@@ -66,6 +75,7 @@ static void read_line(prgm_t *program)
   add_history(program->cmd->line);
 
   free_ast(program->ast);
+  program->ast = NULL;
   free(temp);
 
   if(lexer_line != NULL)
@@ -103,6 +113,7 @@ static void free_program(prgm_t *program)
   free(program->parser);
   free(program->cmd->line);
   free(program->cmd);
+  free(program->exec);
   free(program);
 }
 
@@ -135,7 +146,10 @@ static void free_ast(node_t *ast)
   free_ast(ast->right);
 
   if(ast->value)
+  {
     free(ast->value);
+    ast->value = NULL;
+  }
 
   free(ast);
 }
@@ -238,38 +252,110 @@ static void cd(prgm_t *program)
 
 static void env(prgm_t *program)
 {
-//  node_t *options = program->ast->left;
+  node_t *root              = program->ast->left;
+  envflag_t flag            = extract_flags(&root);
+  program->exec->root       = NULL;
 
-  eval_env(program->ast->left);
+  /* extracts env vars assigment operands. stores new root position in program->exec->root to extract command */
+  if(root && root->type == ASSIGN_OPERATOR)
+    extract_env(program, root, false);
+  
+  /* if no assigment, set program->exec->root manually */
+  if(!program->exec->root)
+    program->exec->root = root;
 
-//  while(options)
-//  {
-//
-//     if(options->type == FLAG || options->type == DOUBLE_FLAG)
-//     {
-//      printf("%s\n", options->value);
-//      options = options->left;
-//     }
-//
-//  }
+  /* extract command to be execute via env*/
+   extract_command(program, program->exec->root);
 
 }
 
 
-
-static void eval_env(node_t *root)
+static envflag_t extract_flags(node_t **root)
 {
+  envflag_t flag = INIT;
+
+  while(*root && ((*root)->type == FLAG || (*root)->type == DOUBLE_FLAG))
+  {
+    /* env takes a single option. if more flags are passed in skip remaining */
+    if(flag != INIT)
+    {
+      *root = (*root)->left;
+      continue;
+    }
+
+    if((strcmp((*root)->value, IGNORE_SINGLE) == 0) || strcmp((*root)->value, IGNORE_DOUBLE) == 0 )
+      flag = IGNORE;
+
+    else if((strcmp((*root)->value, UNSET_SINGLE) == 0))
+      flag = UNSET;
+
+    else if((strcmp((*root)->value, NILL_SINGLE) == 0) || strcmp((*root)->value, NILL_DOUBLE) == 0 )
+      flag = NILL;
+
+    else if((strcmp((*root)->value, CDIR_SINGLE) == 0) || strcmp((*root)->value, CDIR_DOUBLE) == 0 )
+      flag = CDIR;
+
+    else
+      return ERR;
+
+    /* uniary operations always to left */
+    *root = (*root)->left;
+  }
+
+  return flag;
+
+}
+
+static void extract_env(prgm_t *program, node_t *root, bool was_assignment)
+{
+  bool was_assignment_next = false;
 
   if(!root)
     return;
 
+  if(root->type == ASSIGN_OPERATOR)
+  {
+    program->env->temp_vars->insert(program->env->temp_vars, root->left->value, root->right->value);
+    was_assignment_next = true;
+  }
 
-  if(root->type != ASSIGN_OPERATOR)
-      printf("%s\n", root->value);
+  if(!was_assignment && !(root->type == ASSIGN_OPERATOR))
+  {
+    program->exec->root = root;
+    return;
+  }
 
-  eval_env(root->left);
-  eval_env(root->right);
+  extract_env(program, root->left, was_assignment_next);
+  extract_env(program, root->right, was_assignment_next);
+}
 
+
+static void extract_command(prgm_t *program, node_t *root)
+{
+
+  /* root must have a value */
+  if(!root && root->value)
+    return;
+
+   int index          = 0; 
+   program->exec->bin = root->value;
+   root               = root->left;
+
+  while(root)
+  {
+    /* limit of 99 arguments */
+    if(index >= MAX_ARGV_LEN)
+      break;
+
+    program->exec->argv[index] = root->value;
+    root = root->left;
+
+    index++;
+
+  }
+
+  /* last item is a null */
+  program->exec->argv[index] = NULL;
 
 }
 

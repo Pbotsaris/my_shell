@@ -120,6 +120,7 @@ static node_t *operands(parser_t *parser, lexer_t *lexer)
     /* always to the left */
     node_t *tail     = get_left_tail(root);
     tail->left       = arguments(parser, lexer);
+
   }
 
   return root;
@@ -195,7 +196,7 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
       tail->left     = literal;
    }
    else
-     root = literal;
+     root            = literal;
 
   }
 
@@ -219,7 +220,7 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
   /* unexpected token */
   if(token->type != type)
   {
-    printf("unexpected token: was: %d, should be: %d \n", token->type, type);
+    printf("unexpected token. \n");
     parser->valid = false;
     return NULL;
   }

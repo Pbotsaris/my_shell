@@ -21,14 +21,13 @@
 /* PUBLIC METHOD */
 static void load(env_t *env, char **envs);
 static void free_envs(env_t *env);
-static void print_envs(env_t *env);
+static void print_env(env_t *env);
+static void print_temp_env(env_t *env);
 
 /* PRIVATE */
 static void load_envs(env_t *env, char **envs);
-static void load_bin(env_t *env);
 
 /* PRIVATE HELPERS */
-static void load_from_bindir(env_t *env, char *path);
 static void split_paths(env_t *env, char *paths);
 static char* get_key(char *env);
 static char* get_pair(char *env);
@@ -42,14 +41,14 @@ env_t *init_env(void)
 {
   env_t *env       = (env_t*)malloc(sizeof(env_t));
   env->vars        = init_map();
-  /* TODO: remove this map */
-  env->bin         = init_map();
+  env->temp_vars   = init_map();
   env->paths       = NULL;
   env->pwd         = NULL;
   env->user        = NULL;
   env->load        = load;
   env->free        = free_envs;
-  env->print       = print_envs;
+  env->print       = print_env;
+  env->print_temp  = print_temp_env;
 
   return env;
 }
@@ -59,8 +58,6 @@ env_t *init_env(void)
 static void load(env_t *env, char **envs)
 {
   load_envs(env, envs);
-  /* TODO: no need to load bins into memory. clear rest of code  */
- // load_bin(env);
 }
 
 
@@ -71,9 +68,9 @@ static void free_envs(env_t *env)
   for(int i = 0; i < env->paths_len; i++)
     free(env->paths[i]);
 
+  /* free hash maps after use */
   env->vars->free(env->vars);
-  /* TODO: remove this map */
-  env->bin->free(env->bin);
+  env->temp_vars->free(env->temp_vars);
 
   free(env->paths);
   free(env);
@@ -81,10 +78,19 @@ static void free_envs(env_t *env)
 
 /**/
 
-static void print_envs(env_t *env)
+static void print_env(env_t *env)
 {
   env->vars->print_all(env->vars);
 }
+
+
+/**/
+
+static void print_temp_env(env_t *env)
+{
+  env->temp_vars->print_all(env->temp_vars);
+}
+
 
 
 /* PRIVATE */
@@ -100,6 +106,10 @@ static void load_envs(env_t *env, char **envs)
     char *pair       = get_pair(envs[i]);
 
     env->vars->insert(env->vars, key, pair);
+
+    /* loads a copy of envirioment to be modifed by the env command */
+    env->temp_vars->insert(env->temp_vars, key, pair);
+
     free(pair);
     free(key);
 
@@ -109,6 +119,8 @@ static void load_envs(env_t *env, char **envs)
   entry_t *path     = env->vars->get(env->vars, PATH_ENV);
   entry_t *user     = env->vars->get(env->vars, USER_ENV);
   entry_t *pwd      = env->vars->get(env->vars, PWD_ENV);
+
+  /* shortcut for easy access */
   env->user         = user->pair;
   env->pwd          = pwd->pair;
 
@@ -116,42 +128,9 @@ static void load_envs(env_t *env, char **envs)
 
 }
 
-/* TODO: remove this map */
-static void load_bin(env_t *env)
-{
-
-   for(int i = 0; i < env->paths_len; i++)
-     load_from_bindir(env, env->paths[i]);
-}
 
 /* PRIVATE HELPERS */
 
-/* TODO: there is no need to load all binaries however this logic will be useful down the line
- *       to scan directories in path looking for certain bins.
- */
-static void load_from_bindir(env_t *env, char *path)
-{
-
-  struct dirent *pDirent;
-  DIR *dir;
-
- if((dir = opendir(path)) == NULL)
-     return;
-
-    while((pDirent = readdir(dir)) != NULL)
-    {
-      if(pDirent->d_name[0] != '.')
-      {
-          /* hash table will only take unique keys so duplicates are ignored */
-          env->bin->insert(env->bin, pDirent->d_name, pDirent->d_name);
-      }
-    }
-
-    closedir(dir);
-
-}
-
-/**/
 
 static void split_paths(env_t *env, char *paths)
 {

@@ -17,8 +17,6 @@
  */
 #include "../include/lexer.h"
 
-// TODO: WORK ON LINE BREAK. IMPLMENETED EVERYWHERE NOT NOT WORKING YET. MAYBE CONDITIONAL IS NOT WORKING
-
 /* PUBLIC METHODS */
 static void load(lexer_t *lexer, char *cmd);
 static token_t *get_next_token(lexer_t *lexer);
@@ -119,7 +117,7 @@ static token_t *first_token(lexer_t *lexer)
 
   char cmd[lexer->len + 2];
 
-  /* the type passed in here doesn't matter as long as it is not a LITERAL */
+  /* the type passed in as 2nd arg doesn't matter as long as it is not a LITERAL */
   int len                  = extract_value(lexer, PASS_THROUGH, cmd);
   lexer->is_first          = false;
   token_t *token           = NULL;
@@ -187,13 +185,11 @@ static token_t *next_tokens(lexer_t *lexer)
 
   else if(is_flag(lexer->line, lexer->cursor))
   {
-    lexer->cursor++;
     return tokenize(lexer, FLAG, extract_value);
   }
 
   else if(is_doubleflag(lexer->line, lexer->cursor))
   {
-    lexer->cursor += 2;
     return tokenize(lexer, DOUBLE_FLAG, extract_value);
   }
 
@@ -340,7 +336,7 @@ static bool is_quote(char *line, int cursor)               { return line[cursor]
 static bool is_flag(char *line, int cursor)                { return line[cursor] == '-' && isalpha(line[cursor + 1]);} 
 static bool is_doubleflag(char *line, int cursor)          { return line[cursor] == '-' && line[cursor + 1] == '-' && isalpha(line[cursor + 2]);} 
 static bool is_whitespace(char *line, int cursor)          { return line[cursor] == ' ' || line[cursor] == '\t' || line[cursor] == 10;}
-static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=' && isalpha(line[cursor - 1]);} 
+static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=' && isalpha(line[cursor - 1]) && isalpha(line[cursor + 1]);} 
 static bool is_var(char *line, int cursor)                 { return line[cursor] == '$' && isalpha(line[cursor + 1]); }   
 static bool is_var_assignment(char *line, int cursor)      { return line[cursor] == '='; }
 static bool is_line_break(char *line, int cursor)          { return line[cursor] == '\\' && line[cursor + 1] == 'n' ;}
