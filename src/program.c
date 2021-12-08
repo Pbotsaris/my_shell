@@ -278,13 +278,8 @@ static void env(prgm_t *program)
   if(program->exec->root)
     extract_command(program, program->exec->root);
 
-  program->env->print_temp(program->env);
-
   restore_temp_env(program);
   program->exec->free_envp(program->exec);
-
-  printf("--\n--AFTER\n--\n");
-  program->env->print_temp(program->env);
 
 }
 
