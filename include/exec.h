@@ -23,10 +23,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/wait.h>
 
 #include "../include/env.h"
 #include "../include/parser.h"
+#include "../include/path.h"
 
 #define MAX_ARGV_LEN   100
 
@@ -41,7 +43,7 @@ typedef struct exec {
   char *argv[MAX_ARGV_LEN];                                    /*  arguments for execve. MAX of 99 arguments */
   char **envp;                                                 /*  envirioment for execve */
   void (*free_envp) (struct exec*);
-  void (*execute) (struct exec*);
+  void (*execute) (struct exec*, char**, int);
 
 }exec_t;
 

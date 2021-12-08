@@ -24,6 +24,7 @@ static void print_prompt(prgm_t *program);
 static void exit_program(prgm_t *program);
 static void evaluate(prgm_t *program);
 static void builtins(prgm_t *program);
+static void pass_through(prgm_t *program);
 static void assign_var(prgm_t *program);
 static void echo(prgm_t *program);
 static void cd(prgm_t *program);
@@ -89,8 +90,9 @@ static void evaluate(prgm_t *program)
   switch(program->ast->type)
   {
     case PASS_THROUGH:
-      program->exec->execute(program->exec);
+      pass_through(program);
       return;
+
 
     case ASSIGN_OPERATOR:
       assign_var(program);
@@ -158,6 +160,41 @@ static void free_ast(node_t *ast)
 
 /**/
 
+
+static void pass_through(prgm_t *program)
+{
+  int index                   = 0;
+  node_t *root                = program->ast;
+  program->exec->bin          = root->value;
+
+  while(root)
+  {
+
+    /* only 99 argvs allowed */
+    if(index >= MAX_ARGV_LEN - 1)
+      break;
+
+    program->exec->argv[index] = root->value;
+
+    root = root->left;
+    index++;
+
+  }
+
+  program->exec->argv[index]   = NULL;
+  program->exec->envp          = program->env->vars->to_array(program->env->temp_vars);
+
+  program->exec->execute(program->exec, program->env->paths, program->env->paths_len);
+  program->exec->free_envp(program->exec);
+
+}
+
+
+
+
+
+/**/
+
 static void builtins(prgm_t *program)
 {
   switch(program->ast->type)
@@ -204,6 +241,8 @@ static void exit_program(prgm_t *program)
 {
   program->is_exit = true;
 }
+
+
 
 /**/
 
@@ -271,7 +310,7 @@ static void env(prgm_t *program)
   if(flag == UNSET)
   {
     if(!program->env->temp_vars->destroy(program->env->temp_vars, root->value))
-       printf("%s does not exist in the enviroment\n", root->value);
+      printf("%s does not exist in the enviroment\n", root->value);
 
     root = root->left;
   }
@@ -369,7 +408,6 @@ static void extract_command(prgm_t *program, node_t *root)
 
   int index             = 0; 
   program->exec->bin    = root->value;
-  root                  = root->left;
 
   while(root)
   {

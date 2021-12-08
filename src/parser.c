@@ -21,6 +21,7 @@
 static node_t *parse(parser_t *parser, lexer_t *lexer);
 static node_t *command(parser_t *parser, lexer_t *lexer);
 static node_t *builtins(parser_t *parser, lexer_t *lexer);
+static node_t *pass_through(parser_t *parser, lexer_t *lexer);
 static node_t *variable_assign(parser_t *parser, lexer_t *lexer);
 static node_t *operands(parser_t *parse, lexer_t *lexer);
 static node_t *quotes(parser_t *parser, lexer_t *lexer);
@@ -66,7 +67,7 @@ static node_t *parse(parser_t *parser, lexer_t *lexer)
 static node_t *command(parser_t *parser, lexer_t *lexer)
 {
   if(parser->lookahead->type == PASS_THROUGH)
-    return eat(parser, lexer, PASS_THROUGH);
+    return pass_through(parser, lexer);
 
   if(parser->lookahead->type == VARIABLE_ASSIGN)
     return variable_assign(parser, lexer);
@@ -74,6 +75,19 @@ static node_t *command(parser_t *parser, lexer_t *lexer)
   else return builtins(parser, lexer);
 
 }
+
+/**/
+
+static node_t *pass_through(parser_t *parser, lexer_t *lexer)
+{
+    node_t *root = eat(parser, lexer, PASS_THROUGH);
+
+    if(parser->lookahead)
+       root->left = operands(parser, lexer);
+
+  return  root;
+}
+
 
 /**/
 

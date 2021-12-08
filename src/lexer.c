@@ -154,11 +154,7 @@ static token_t *first_token(lexer_t *lexer)
      return token_with_value(cmd, len, VARIABLE_ASSIGN);
 
   else
-  {
-    /* pass throughs return whole line in token->value */
-    token = passthrough(lexer->line, lexer->len);
-    lexer->cursor = lexer->len;
-  }
+    return token_with_value(cmd, len, PASS_THROUGH);
 
   return token;
 }
