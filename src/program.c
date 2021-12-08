@@ -222,7 +222,6 @@ static void echo(prgm_t *program)
     if(root->type == LINE_BREAK)
       printf("\n"); 
 
-
     root = root->left;
   }
 
@@ -249,12 +248,23 @@ static void cd(prgm_t *program)
 
 }
 
-
 static void env(prgm_t *program)
 {
   node_t *root              = program->ast->left;
   envflag_t flag            = extract_flags(&root);
   program->exec->root       = NULL;
+
+  /* env with no operands */
+  if(!root && flag == INIT)
+    program->env->print(program->env);
+
+  if(flag == UNSET)
+  {
+    program->env->temp_vars->destroy(program->env->temp_vars, root->value);
+    root = root->left;
+  }
+
+    program->env->print_temp(program->env);
 
   /* extracts env vars assigment operands. stores new root position in program->exec->root to extract command */
   if(root && root->type == ASSIGN_OPERATOR)
@@ -265,7 +275,8 @@ static void env(prgm_t *program)
     program->exec->root = root;
 
   /* extract command to be execute via env*/
-   extract_command(program, program->exec->root);
+  if(program->exec->root)
+    extract_command(program, program->exec->root);
 
 }
 
@@ -334,7 +345,7 @@ static void extract_command(prgm_t *program, node_t *root)
 {
 
   /* root must have a value */
-  if(!root && root->value)
+  if(!root && !root->value)
     return;
 
    int index          = 0; 

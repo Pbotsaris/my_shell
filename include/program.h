@@ -36,14 +36,14 @@
 #include "../include/parser.h"
 #include "../include/path.h"
 
-#define IGNORE_SINGLE  "i"
-#define IGNORE_DOUBLE  "ignore-environment"
-#define UNSET_SINGLE   "u"
-#define UNSET_DOUBLE   "unset"
-#define NILL_SINGLE    "0"
-#define NILL_DOUBLE    "null"
-#define CDIR_SINGLE    "C"
-#define CDIR_DOUBLE    "chdir"
+#define IGNORE_SINGLE  "-i"
+#define IGNORE_DOUBLE  "--ignore-environment"
+#define UNSET_SINGLE   "-u"
+#define UNSET_DOUBLE   "--unset"
+#define NILL_SINGLE    "-0"
+#define NILL_DOUBLE    "--null"
+#define CDIR_SINGLE    "-C"
+#define CDIR_DOUBLE    "--chdir"
 #define MAX_ARGV_LEN   100
 
 typedef enum envflags{
@@ -69,13 +69,13 @@ typedef struct cmd{
 
 
 /* 
- *           the exec struct stores the necessary paramenters
- *           to execute an external binary with execve 
+ *           the exec struct holds the necessary paramenters
+ *           to execute an external program with execve 
  */
 
 typedef struct exec {
   node_t *root;                                                /* root of the ast branch to extract command to be executed by execve */
-  char *bin;                                                   /*  bin to execute */
+  char *bin;                                                   /*  the bin to be executed by execve */
   char *argv[MAX_ARGV_LEN];                                    /*  arguments for execve. MAX of 99 arguments */
   char **envp;                                                 /*  envirioment for execve */
 
@@ -94,7 +94,7 @@ typedef struct program
   env_t    *env;                                             /* the envirioment module. see env.c & env.h */
   lexer_t  *lexer;                                           /* the lexer module. see lexer.c & lexer.h */
   parser_t *parser;                                          /* the parser module. see parser.c & parser.h  */
-  node_t   *ast;                                             /* the ast root outputed by the parser module */
+  node_t   *ast;                                             /* the ast root produced by the parser module */
   cmd_t    *cmd;                                             /* cmd struct. see above */
   exec_t   *exec;                                            /* exec struct. see above */
   bool     is_exit;                                          /* tracks if whether the user issued a exit command  */

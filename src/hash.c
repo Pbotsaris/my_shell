@@ -113,17 +113,35 @@ static bool destroy(map_t *map, char *key)
 
   unsigned int slot     = hash(key);
   entry_t *entry        = map->entries[slot];
+  entry_t *prev         = NULL;
 
   if(entry == NULL)
     return false;
 
-  free(entry->key);
-  free(entry->pair);
-  free(entry);
 
-  map->entries[slot] = NULL;
+while(entry != NULL)
+  {
+    if(strcmp(entry->key, key) == 0)
+    {
+    if(prev)
+       prev->next = entry->next;
+    /* if deleting first item of linked list */
+    else
+      map->entries[slot] = entry->next;
 
-  return true;
+    free(entry->key);
+    free(entry->pair);
+    free(entry);
+    return true;
+    }
+    prev = entry;
+    entry = entry->next;
+
+  }
+
+//  map->entries[slot] = NULL;
+
+  return false;
 
 }
 
