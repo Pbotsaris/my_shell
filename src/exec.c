@@ -20,6 +20,7 @@
 
 
 static void free_envp(exec_t *exec);
+static void execute(exec_t *exec);
 
 exec_t *init_exec(void)
 {
@@ -28,7 +29,8 @@ exec_t *init_exec(void)
   exec->envp             = NULL;
   exec->argv[0]          = NULL;
   exec->root             = NULL;
-  exec->free_envp        =free_envp;
+  exec->free_envp        = free_envp;
+  exec->execute          = execute;
   
   return exec;
 
@@ -48,3 +50,38 @@ static void free_envp(exec_t *exec)
   free(exec->envp);
 
 }
+
+static void execute(exec_t *exec)
+{
+  pid_t pid, wpid;
+  int status;
+
+
+  if ((pid = fork()) == 0)
+  {
+    char *argv[] = {"ls", NULL};
+    char *envp[] = {"pedro", "pedro",  NULL};
+
+    if((execve("/usr/bin/ls", argv, envp )) == -1)
+    {
+      perror("ls");
+      exit(EXIT_FAILURE);
+
+    }
+
+    exit(EXIT_SUCCESS);
+  }
+
+  else if(pid == -1)
+    printf("error executing binary\n");
+
+  else
+  {
+    do 
+      wpid = waitpid(pid, &status, WUNTRACED);
+    while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+  }
+
+}
+

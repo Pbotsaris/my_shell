@@ -68,7 +68,9 @@ static void read_line(prgm_t *program)
   program->lexer->load(program->lexer, program->cmd->line);
   program->ast = program->parser->parse(program->parser, program->lexer);
 
+
   evaluate(program);
+
 
   add_history(program->cmd->line);
 
@@ -87,7 +89,7 @@ static void evaluate(prgm_t *program)
   switch(program->ast->type)
   {
     case PASS_THROUGH:
-      printf("fork and execute!\n");
+      program->exec->execute(program->exec);
       return;
 
     case ASSIGN_OPERATOR:
@@ -135,6 +137,8 @@ static void assign_var(prgm_t *program)
 
 }
 
+/**/
+
 static void free_ast(node_t *ast)
 {
   if(ast == NULL)
@@ -151,6 +155,8 @@ static void free_ast(node_t *ast)
 
   free(ast);
 }
+
+/**/
 
 static void builtins(prgm_t *program)
 {
@@ -192,12 +198,14 @@ static void builtins(prgm_t *program)
   }
 }
 
+/**/
 
 static void exit_program(prgm_t *program)
 {
   program->is_exit = true;
 }
 
+/**/
 
 static void echo(prgm_t *program)
 {
@@ -227,6 +235,8 @@ static void echo(prgm_t *program)
 
 } 
 
+/**/
+
 static void cd(prgm_t *program)
 {
 
@@ -245,6 +255,8 @@ static void cd(prgm_t *program)
   free_paths(dir_names);
 
 }
+
+/**/
 
 static void env(prgm_t *program)
 {
@@ -283,6 +295,7 @@ static void env(prgm_t *program)
 
 }
 
+/**/
 
 static envflag_t extract_flags(node_t **root)
 {
@@ -320,6 +333,8 @@ static envflag_t extract_flags(node_t **root)
 
 }
 
+/**/
+
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment)
 {
   bool was_assignment_next   = false;
@@ -343,6 +358,7 @@ static void extract_env(prgm_t *program, node_t *root, bool was_assignment)
   extract_env(program, root->right, was_assignment_next);
 }
 
+/**/
 
 static void extract_command(prgm_t *program, node_t *root)
 {
@@ -373,6 +389,7 @@ static void extract_command(prgm_t *program, node_t *root)
 
 }
 
+/**/
 
 static void restore_temp_env(prgm_t *program)
 {

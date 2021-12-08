@@ -20,6 +20,11 @@
 #define EXEC_H
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <sys/wait.h>
+
 #include "../include/env.h"
 #include "../include/parser.h"
 
@@ -36,6 +41,7 @@ typedef struct exec {
   char *argv[MAX_ARGV_LEN];                                    /*  arguments for execve. MAX of 99 arguments */
   char **envp;                                                 /*  envirioment for execve */
   void (*free_envp) (struct exec*);
+  void (*execute) (struct exec*);
 
 }exec_t;
 
