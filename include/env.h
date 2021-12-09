@@ -32,6 +32,7 @@
 #define PATH_ENV "PATH"
 #define USER_ENV "USER"
 #define PWD_ENV "PWD"
+#define HOME_ENV "HOME"
 #define DELIM ":"
 
 typedef struct env{

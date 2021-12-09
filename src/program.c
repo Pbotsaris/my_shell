@@ -277,7 +277,14 @@ static void echo(prgm_t *program)
 /**/
 
 static void cd(prgm_t *program)
-{
+{ 
+
+  if((strcmp(program->ast->left->value, HOME))== 0)
+  {
+    entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
+    program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
+    return;
+  }
 
   pathnode_t *dir_names   = split_path(program->ast->left->value);
   entry_t *pwd            = program->env->vars->get(program->env->vars, PWD_ENV);
@@ -319,8 +326,8 @@ static void env(prgm_t *program)
   if(root && root->type == ASSIGN_OPERATOR)
     extract_env(program, root, false);
 
-  program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
 
+  program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
   /* if no assigment, set program->exec->root manually */
   if(!program->exec->root)
     program->exec->root = root;

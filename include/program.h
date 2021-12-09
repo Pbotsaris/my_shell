@@ -29,6 +29,7 @@
 
 #define PSUFIX "%>"
 #define PSEP  "-"
+#define HOME "~"
 
 #include <editline/readline.h>
 #include "../include/env.h"
