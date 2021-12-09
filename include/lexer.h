@@ -79,7 +79,7 @@ typedef struct lexer
 
 }lexer_t;
 
-typedef int (fpointer_t)(lexer_t*, type_t, char*);
+typedef int (fpointer_t)(lexer_t*, char*);
 
 
 lexer_t *init_lexer();

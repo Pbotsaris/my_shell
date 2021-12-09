@@ -26,16 +26,13 @@ static token_t *first_token(lexer_t *lexer);
 static token_t *next_tokens(lexer_t *lexer);
 
 /* PRIVATE HELPERS */
-static token_t *tokenize(lexer_t *lexer, type_t type, fpointer_t extract);
-static token_t *passthrough(char* cmd, int len);
-
+static token_t *tokenize(lexer_t *lexer, type_t type);
 static token_t *token_with_value(char *cmd, int len, type_t type);
 static token_t *create_token(type_t type);
 static void add_token_value(token_t *token, char* cmd, int len);
 
 /* FUNCTION POINTERS */
-static int extract_value(lexer_t *lexer, type_t type, char *buffer);
-static int extract_whitespaces(lexer_t *lexer, type_t type, char *buffer);
+static int extract_value(lexer_t *lexer, char *buffer);
 static void skip_whitespace(lexer_t *lexer);
 
 /* CONDITIONALS */
@@ -118,7 +115,7 @@ static token_t *first_token(lexer_t *lexer)
   char cmd[lexer->len + 2];
 
   /* the type passed in as 2nd arg doesn't matter as long as it is not a LITERAL */
-  int len                  = extract_value(lexer, PASS_THROUGH, cmd);
+  int len                  = extract_value(lexer, cmd);
   lexer->is_first          = false;
   token_t *token           = NULL;
 
@@ -171,7 +168,7 @@ static token_t *next_tokens(lexer_t *lexer)
   }
 
   else if(is_arg_assigment(lexer->line, lexer->cursor))
-     return tokenize(lexer, VARIABLE_ASSIGN, extract_value);
+    return tokenize(lexer, VARIABLE_ASSIGN);
 
   else if(is_assign_operator(lexer->line, lexer->cursor))
   {
@@ -181,33 +178,33 @@ static token_t *next_tokens(lexer_t *lexer)
 
   else if(is_flag(lexer->line, lexer->cursor))
   {
-    return tokenize(lexer, FLAG, extract_value);
+    return tokenize(lexer, FLAG);
   }
 
   else if(is_doubleflag(lexer->line, lexer->cursor))
   {
-    return tokenize(lexer, DOUBLE_FLAG, extract_value);
+    return tokenize(lexer, DOUBLE_FLAG);
   }
 
   else if(is_var(lexer->line, lexer->cursor)){
     /* skip $ */
     lexer->cursor++;
-    return tokenize(lexer, VARIABLE, extract_value);
+    return tokenize(lexer, VARIABLE);
   }
 
   else if (is_literal(lexer->line, lexer->cursor))
-    return tokenize(lexer, LITERAL, extract_value);
+    return tokenize(lexer, LITERAL);
 
   /* tokenize whisspace when echo */
 
   else if(lexer->is_echo && is_whitespace(lexer->line, lexer->cursor))
-    return tokenize(lexer, WHITESPACE, extract_whitespaces);
+    return tokenize(lexer, WHITESPACE);
 
 
   /* tokenize linebreaks with echo */
 
   else if(lexer->is_echo && is_line_break(lexer->line, lexer->cursor))
-    return tokenize(lexer, LINE_BREAK, extract_value);
+    return tokenize(lexer, LINE_BREAK);
 
   else if((is_whitespace(lexer->line, lexer->cursor)))
   {
@@ -220,19 +217,12 @@ static token_t *next_tokens(lexer_t *lexer)
 
 /* PRIVATE HELPERS */
 
-static token_t *tokenize(lexer_t *lexer, type_t type, fpointer_t extract)
+static token_t *tokenize(lexer_t *lexer, type_t type)
 {
 
   char buffer[lexer->len];
-  int len = extract(lexer, type, buffer);
+  int len = extract_value(lexer, buffer);
   return token_with_value(buffer, len, type);
-}
-
-/**/
-
-static token_t *passthrough(char* cmd, int len)
-{
-  return token_with_value(cmd, len, PASS_THROUGH);
 }
 
 /**/
@@ -267,7 +257,7 @@ static token_t *create_token(type_t type)
 
 /**/
 
-static int extract_value(lexer_t *lexer, type_t type, char *buffer)
+static int extract_value(lexer_t *lexer, char *buffer)
 {
   int i = 0;
 
@@ -290,29 +280,10 @@ static int extract_value(lexer_t *lexer, type_t type, char *buffer)
 
 /**/
 
-static int extract_whitespaces(lexer_t *lexer, type_t type, char *buffer)
-{
-  if(type != WHITESPACE)
-      return -1;
-
-  int i = 0;
-
-  while(lexer->line[lexer->cursor] == ' ')
-  {
-    buffer[i] = lexer->line[lexer->cursor];
-    i++;
-    lexer->cursor++;
-  }
-
-  buffer[i++] = '\0';
-
-  return i;
-}
-
 static void skip_whitespace(lexer_t *lexer)
 {
   while(lexer->line[lexer->cursor] == ' ')
-     lexer->cursor++;
+    lexer->cursor++;
 }
 
 
@@ -353,17 +324,17 @@ static bool is_arg_assigment(char *line, int cursor)
 
   int index = cursor;
 
-while(line[index] != '\0')
-{
- if(line[index] == ' ')
-   break;
+  while(line[index] != '\0')
+  {
+    if(line[index] == ' ')
+      break;
 
- if(line[index] == '=')
-   return true;
+    if(line[index] == '=')
+      return true;
 
- index++;
-}
+    index++;
+  }
 
-return false;
+  return false;
 
 }

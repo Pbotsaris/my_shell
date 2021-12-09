@@ -100,8 +100,7 @@ static void print_temp_env(env_t *env)
   env->temp_vars->print_all(env->temp_vars);
 }
 
-static void restore_envs(env_t *env, char **envs, bool is_init)
-{
+static void restore_envs(env_t *env, char **envs, bool is_init){
 
  int i              = 0;
 
@@ -154,11 +153,13 @@ static void load_envs(env_t *env, char **envs)
 static void split_paths(env_t *env, char *paths)
 {
 
-  /* strtok modfies str  */
   size_t plen          = strlen(paths);
   char temp[plen];
+
+  /* strtok modfies str so make a cpy */
   strncpy(temp, paths, plen);
 
+  temp[plen]           = '\0';
   env->paths_len       =  count_paths(paths);
   char *cursor         = strtok(temp, DELIM);
   int index            = 0;

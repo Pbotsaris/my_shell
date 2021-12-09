@@ -57,8 +57,8 @@ static void free_envp(exec_t *exec)
 
 static void execute(exec_t *exec, char **paths, int paths_len)
 {
-  bool searched_bin = false;
-  char *cmd_path = NULL;
+  bool searched_bin   = false;
+  char *cmd_path      = NULL;
 
   /* check relative or absolute path  */
   if(exec->bin[0] == '.' || exec->bin[0] == '/')
@@ -85,16 +85,12 @@ static void fork_and_exec(exec_t *exec, char *cmd_path)
 
   if ((pid = fork()) == 0)
   {
-
     if((execve(cmd_path, exec->argv, exec->envp)) == -1)
     {
-
       perror(exec->bin);
       exit(EXIT_FAILURE);
     }
-
     exit(EXIT_SUCCESS);
-
   }
 
   else if(pid == -1)
@@ -106,7 +102,12 @@ static void fork_and_exec(exec_t *exec, char *cmd_path)
       wpid = waitpid(pid, &status, WUNTRACED);
     while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
+
+  if(wpid == 0)
+    printf("%d", wpid);
+
   }
+
 
 }
 
@@ -142,7 +143,10 @@ static bool bin_exists(char *path, char *cmd)
 
   while((pDirent = readdir(dir)) != NULL)
     if((strcmp(pDirent->d_name, cmd)) == 0)
+    {
+      closedir(dir);
       return true;
+    }
 
   closedir(dir);
 

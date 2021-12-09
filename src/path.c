@@ -32,6 +32,7 @@ pathnode_t *split_path(char *path)
   int path_index     = 0;
   int buff_index     = 0;
   char buffer[strlen(path)];
+  buffer[0]          = '\0';
 
   while(path[path_index] != '\0')
   {
@@ -109,7 +110,7 @@ char *new_pwd(char *pwd, char *to_join)
   new_pwd[pwd_len]                = '/';
   new_pwd[pwd_len + 1]            = '\0';
   strncat(new_pwd, to_join, new_pwd_len);
-  new_pwd[new_pwd_len - 1] = '\0';
+  new_pwd[new_pwd_len - 1]        = '\0';
 
   return new_pwd;
 
