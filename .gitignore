@@ -1,4 +1,5 @@
 obj/*.o
 bin/*
-bin/my_mouse
+bin/my_zsh
 *.txt
+a.out
