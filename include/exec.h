@@ -3,7 +3,7 @@
  *
  *       Filename:  exec.h
  *
- *    Description:  
+ *    Description:  This module is responsible for executing an external binary.
  *
  *        Version:  1.0
  *        Created:  12/08/21 09:38:15
@@ -33,8 +33,8 @@
 #define MAX_ARGV_LEN   100
 
 /* 
- *           the exec struct holds the necessary paramenters
- *           to execute an external program with execve 
+ *           the exec struct holds the necessary data and functionality
+ *           to execute an external program with execve.
  */
 
 typedef struct exec {
@@ -42,8 +42,8 @@ typedef struct exec {
   char *bin;                                                   /*  the bin to be executed by execve */
   char *argv[MAX_ARGV_LEN];                                    /*  arguments for execve. MAX of 99 arguments */
   char **envp;                                                 /*  envirioment for execve */
-  void (*free_envp) (struct exec*);
-  void (*execute) (struct exec*, char**, int);
+  void (*free_envp) (struct exec*);                            /*  frees up array in the envp field */
+  void (*execute) (struct exec*, char**, int);                 /*  forks and executes an external binary in another process */
 
 }exec_t;
 

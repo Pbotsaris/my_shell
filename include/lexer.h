@@ -3,14 +3,15 @@
  *
  *       Filename:  lexer.h
  *
- *    Description:  
+ *    Description:  The lexer modules tokenizes an expression producing tokens as 
+ *                  requested by the parser module.
  *
  *        Version:  1.0
  *        Created:  11/15/21 23:20:33
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
+ *         Author:  Pedro Botsaris
  *   Organization:  
  *
  * =====================================================================================
@@ -36,7 +37,7 @@
 
 #include <ctype.h>
 typedef enum type {
-  /* Builtins */
+                       /* builtins */
   ECHO,                      /* 00 */
   CD,                        /* 01 */
   SETENV,                    /* 02 */
@@ -45,7 +46,7 @@ typedef enum type {
   PWD,                       /* 05 */
   EXIT,                      /* 06 */
   WHICH,                     /* 07 */
-   /* syntax */
+                         /* syntax */
   LITERAL,                   /* 08 */
   VARIABLE_ASSIGN,           /* 09 */
   VARIABLE,                  /* 10 */
@@ -55,10 +56,16 @@ typedef enum type {
   QUOTE,                     /* 14 */
   WHITESPACE,                /* 15 */
   LINE_BREAK,                /* 16 */
- /* execve */
+                         /* execve */
   PASS_THROUGH,              /* 17 */
 
 }type_t;
+
+/*
+ *          the token produced by the lexer as it tokenized an expression. 
+ *          It has a value and the type as defined above.
+ *          these tokens are consumed by the parser.c
+ */
 
 typedef struct token
 {
@@ -69,19 +76,19 @@ typedef struct token
 
 typedef struct lexer
 {
- char *line;
- size_t len;
- int cursor;
- bool is_first;          /* first handle commands then arguments */
- bool is_echo;           /* echo whitespaces get special treatment. tracks if was echo */
- void (*load) (struct lexer*, char*);
- token_t *(*get_next_token) (struct lexer*);
+ char *line;                                       /* the expression being tokenized */  
+ size_t len;                                       /* the length of the expression being tokenized */  
+ int cursor;                                       /* tracks the char position in line as lexer tokenizes the expression */ 
+ bool is_first;                                    /* first handle commands then arguments */
+ bool is_echo;                                     /* echo whitespaces get special treatment. tracks if was echo */
+ void (*load) (struct lexer*, char*);              /* loads line into lexer */
+ token_t *(*get_next_token) (struct lexer*);       /* produces next token. this method is called by the parser */
 
 }lexer_t;
 
 typedef int (fpointer_t)(lexer_t*, type_t, char*);
 
-
+/* INITIALIZER */
 lexer_t *init_lexer();
 
 #endif

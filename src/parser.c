@@ -3,14 +3,15 @@
  *
  *       Filename:  parser.c
  *
- *    Description:  
+ *    Description:  The parser module consumes tokens from the lexer module producing 
+ *                  an ast.
  *
  *        Version:  1.0
  *        Created:  11/19/21 09:25:51
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
+ *         Author:  Pedro Botsaris, 
  *   Organization:  
  *
  * =====================================================================================

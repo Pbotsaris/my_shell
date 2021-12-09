@@ -3,7 +3,7 @@
  *
  *       Filename:  program.h
  *
- *    Description:  The program modules holds all the functionality and data for
+ *    Description:  The program module holds all the functionality and data for
  *                  this program.
  *
  *        Version:  1.0
@@ -17,19 +17,8 @@
  * =====================================================================================
  */
 
-
-
 #ifndef PROGRAM_H
 #define PROGRAM_H
-
-
-/*
- *          change PSUFIX and PSEP to customize the prompt
- */
-
-#define PSUFIX "%>"
-#define PSEP  "-"
-#define HOME "~"
 
 #include <editline/readline.h>
 #include "../include/env.h"
@@ -38,23 +27,12 @@
 #include "../include/path.h"
 #include "../include/exec.h"
 
-#define IGNORE_SINGLE  "-i"
-#define IGNORE_DOUBLE  "--ignore-environment"
-#define UNSET_SINGLE   "-u"
-#define UNSET_DOUBLE   "--unset"
-#define NILL_SINGLE    "-0"
-#define NILL_DOUBLE    "--null"
-#define CDIR_SINGLE    "-C"
-#define CDIR_DOUBLE    "--chdir"
+/*
+ *          change PSUFIX and PSEP to customize the prompt
+ */
 
-typedef enum envflags{
-  INIT,                /* 0 */
-  IGNORE,              /* 1 */
-  UNSET,               /* 2 */
-  NILL,                /* 3 */
-  CDIR,                /* 4 */
-  ERR,                 /* 5 */
-}envflag_t;
+#define PSUFIX "%>"
+#define PSEP  "-"
 
 /*
  *           the cmd struct stores temporarely the
@@ -83,13 +61,20 @@ typedef struct program
   cmd_t    *cmd;                                             /* cmd struct. see above */
   exec_t   *exec;                                            /* exec struct. see above */
   bool     is_exit;                                          /* tracks if whether the user issued a exit command  */
-  void     (*print_prompt) (struct program*);
-  void     (*free) (struct program*);
-  void     (*readline) (struct program*);
+  void     (*print_prompt) (struct program*);                /* prints a new prompt whenever a new line is being read  */
+  void     (*free) (struct program*);                        /* frees all memory related to this program */
+  void     (*readline) (struct program*);                    /* read and executes a line */
 
 }prgm_t;
 
 
+/* builtins in builtins.c */
+void echo(prgm_t *program);
+void cd(prgm_t *program);
+void env(prgm_t *program);
+void exit_program(prgm_t *program);
+
+/* initialization */
 prgm_t *init_program(char **envs);
 
 #endif
