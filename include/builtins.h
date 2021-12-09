@@ -32,6 +32,7 @@
 
 /* CD SHORTCUTS */
 #define HOME "~"
+#define PREVPWD "-"
 
 typedef enum envflags{
   INIT,                /* 0 */

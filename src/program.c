@@ -140,7 +140,6 @@ static void pass_through(prgm_t *program)
 
   while(root)
   {
-
     /* only 99 argvs allowed */
     if(index >= MAX_ARGV_LEN - 1)
       break;
@@ -149,7 +148,6 @@ static void pass_through(prgm_t *program)
 
     root = root->left;
     index++;
-
   }
 
   program->exec->argv[index]   = NULL;

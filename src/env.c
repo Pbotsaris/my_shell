@@ -24,7 +24,7 @@ static void free_envs(env_t *env);
 static void print_env(env_t *env);
 static void print_temp_env(env_t *env);
 static void restore_envs(env_t *env, char **envs, bool is_init);
-
+static void update_pwdprev(env_t *env, char *pwd);
 
 /* PRIVATE */
 static void load_envs(env_t *env, char **envs);
@@ -41,17 +41,19 @@ static int key_length(char *env);
 
 env_t *init_env(void)
 {
-  env_t *env       = (env_t*)malloc(sizeof(env_t));
-  env->vars        = init_map();
-  env->temp_vars   = init_map();
-  env->paths       = NULL;
-  env->pwd         = NULL;
-  env->user        = NULL;
-  env->load        = load;
-  env->free        = free_envs;
-  env->print       = print_env;
-  env->print_temp  = print_temp_env;
-  env->restore_env = restore_envs;
+  env_t *env           = (env_t*)malloc(sizeof(env_t));
+  env->vars            = init_map();
+  env->temp_vars       = init_map();
+  env->paths           = NULL;
+  env->pwd             = NULL;
+  env->prev_pwd        = NULL;
+  env->user            = NULL;
+  env->load            = load;
+  env->free            = free_envs;
+  env->print           = print_env;
+  env->print_temp      = print_temp_env;
+  env->restore_env     = restore_envs;
+  env->update_pwdprev  =  update_pwdprev;
 
   return env;
 }
@@ -62,7 +64,6 @@ static void load(env_t *env, char **envs)
 {
   load_envs(env, envs);
 }
-
 
 /**/
 
@@ -76,6 +77,9 @@ static void free_envs(env_t *env)
   env->vars = NULL;
   env->temp_vars->free(env->temp_vars);
   env->temp_vars = NULL;
+
+  if(env->prev_pwd)
+    free(env->prev_pwd);
 
   free(env->paths);
   env->paths = NULL;
@@ -95,6 +99,25 @@ static void print_env(env_t *env)
 
 /**/
 
+static void update_pwdprev(env_t *env, char *pwd)
+{
+
+  if(env->prev_pwd)
+  {
+    free(env->prev_pwd);
+    env->prev_pwd = NULL;
+  }
+
+  size_t len = strlen(pwd);
+  env->prev_pwd = (char*) malloc((len + 1) * sizeof(char));
+  strncpy(env->prev_pwd, pwd, len);
+  env->prev_pwd[len] = '\0';
+
+}
+
+
+/**/
+
 static void print_temp_env(env_t *env)
 {
   env->temp_vars->print_all(env->temp_vars);
@@ -102,7 +125,7 @@ static void print_temp_env(env_t *env)
 
 static void restore_envs(env_t *env, char **envs, bool is_init){
 
- int i              = 0;
+  int i              = 0;
 
   while(envs[i]) 
   {
@@ -140,6 +163,7 @@ static void load_envs(env_t *env, char **envs)
   env->user         = user->pair;
   env->pwd          = pwd->pair;
 
+  update_pwdprev(env, pwd->pair);
   split_paths(env, path->pair);
 
 }

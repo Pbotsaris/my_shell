@@ -65,8 +65,24 @@ void exit_program(prgm_t *program)
 void cd(prgm_t *program)
 { 
 
+  if((strcmp(program->ast->left->value, PREVPWD))== 0)
+  {
+   size_t len        = strlen(program->env->pwd);
+   char buffer[len + 1];
+   strncpy(buffer, program->env->pwd, len);
+   buffer[len]       = '\0';
+
+   program->env->vars->insert(program->env->vars, PWD_ENV, program->env->prev_pwd);
+   program->env->update_pwdprev(program->env, buffer);
+   return;
+
+  }
+
   if((strcmp(program->ast->left->value, HOME))== 0)
   {
+
+    program->env->update_pwdprev(program->env, program->env->pwd);
+    
     entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
     program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
     return;
@@ -77,6 +93,8 @@ void cd(prgm_t *program)
 
   if(path_exists(dir_names, pwd->pair))
   {
+
+    program->env->update_pwdprev(program->env, program->env->pwd);
     char *npwd = new_pwd(pwd->pair, program->ast->left->value);
     program->env->vars->insert(program->env->vars, PWD_ENV, npwd);
     free(npwd);
