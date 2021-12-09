@@ -88,7 +88,6 @@ static void free_envs(env_t *env)
   env = NULL;
 }
 
-
 /**/
 
 static void print_env(env_t *env)

@@ -19,11 +19,26 @@
 #include "../include/program.h"
 #include "../include/builtins.h"
 
-/* PRIVATE HELPERS*/
+/* CD HELPERS*/
+static void cd_handle_prevpwd(prgm_t *program);
+static void cd_handle_home(prgm_t *program);
+static void cd_handle_change(prgm_t *program, entry_t *pwd);
+
+/* ENV HELPERS*/
 static envflag_t extract_flags(node_t **root);
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment);
 static void extract_command(prgm_t *program, node_t *root);
 static void restore_temp_env(prgm_t *program);
+
+/* PUBLIC */
+
+void exit_program(prgm_t *program)
+{
+  program->is_exit = true;
+}
+
+
+/**/
 
  void echo(prgm_t *program)
 {
@@ -53,12 +68,6 @@ static void restore_temp_env(prgm_t *program);
 
 } 
 
-/**/
-
-void exit_program(prgm_t *program)
-{
-  program->is_exit = true;
-}
 
 /**/
 
@@ -67,24 +76,13 @@ void cd(prgm_t *program)
 
   if((strcmp(program->ast->left->value, PREVPWD))== 0)
   {
-   size_t len        = strlen(program->env->pwd);
-   char buffer[len + 1];
-   strncpy(buffer, program->env->pwd, len);
-   buffer[len]       = '\0';
-
-   program->env->vars->insert(program->env->vars, PWD_ENV, program->env->prev_pwd);
-   program->env->update_pwdprev(program->env, buffer);
-   return;
-
+    cd_handle_prevpwd(program);
+    return;
   }
 
   if((strcmp(program->ast->left->value, HOME))== 0)
   {
-
-    program->env->update_pwdprev(program->env, program->env->pwd);
-    
-    entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
-    program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
+    cd_handle_home(program);
     return;
   }
 
@@ -92,19 +90,15 @@ void cd(prgm_t *program)
   entry_t *pwd            = program->env->vars->get(program->env->vars, PWD_ENV);
 
   if(path_exists(dir_names, pwd->pair))
-  {
+    cd_handle_change(program, pwd);
 
-    program->env->update_pwdprev(program->env, program->env->pwd);
-    char *npwd = new_pwd(pwd->pair, program->ast->left->value);
-    program->env->vars->insert(program->env->vars, PWD_ENV, npwd);
-    free(npwd);
-  }
   else
     printf("No such directory\n");
 
   free_paths(dir_names);
 
 }
+
 
 /**/
 
@@ -130,7 +124,6 @@ void env(prgm_t *program)
   if(root && root->type == ASSIGN_OPERATOR)
     extract_env(program, root, false);
 
-
   program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
   /* if no assigment, set program->exec->root manually */
   if(!program->exec->root)
@@ -145,7 +138,45 @@ void env(prgm_t *program)
 
 }
 
-/* PRIVATE HELPERS */
+
+/*PRIVATE: CD HELPERS */
+
+
+static void cd_handle_prevpwd(prgm_t *program)
+{
+
+  size_t len        = strlen(program->env->pwd);
+  char buffer[len + 1];
+  strncpy(buffer, program->env->pwd, len);
+  buffer[len]       = '\0';
+
+  program->env->vars->insert(program->env->vars, PWD_ENV, program->env->prev_pwd);
+  program->env->update_pwdprev(program->env, buffer);
+
+}
+
+
+static void cd_handle_home(prgm_t *program)
+{
+
+  program->env->update_pwdprev(program->env, program->env->pwd);
+  entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
+  program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
+
+}
+
+
+static void cd_handle_change(prgm_t *program, entry_t *pwd)
+{
+  program->env->update_pwdprev(program->env, program->env->pwd);
+  char *npwd = new_pwd(pwd->pair, program->ast->left->value);
+  program->env->vars->insert(program->env->vars, PWD_ENV, npwd);
+  free(npwd);
+
+}
+
+
+/*PRIVATE: ENV HELPERS */
 
 static envflag_t extract_flags(node_t **root)
 {
@@ -258,6 +289,4 @@ static void restore_temp_env(prgm_t *program)
   free(env);
 
 }
-
-
 
