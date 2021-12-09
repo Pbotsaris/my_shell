@@ -45,6 +45,7 @@ prgm_t *init_program(char **envs)
   program->env              = init_env();
   program->lexer            = init_lexer();
   program->parser           = init_parser();
+  program->ast              = NULL;
   program->free             = free_program;
   program->print_prompt     = print_prompt;
   program->readline         = read_line;
@@ -241,7 +242,6 @@ static void exit_program(prgm_t *program)
 {
   program->is_exit = true;
 }
-
 
 
 /**/
