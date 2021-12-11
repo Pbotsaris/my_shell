@@ -145,7 +145,6 @@ static node_t *operands(parser_t *parser, lexer_t *lexer)
 
 static node_t *arguments(parser_t *parser, lexer_t *lexer)
 {
-
   if(parser->lookahead->type == FLAG)
     return eat(parser, lexer, FLAG);
 
@@ -174,7 +173,6 @@ static node_t *arguments(parser_t *parser, lexer_t *lexer)
 
 static node_t *quotes(parser_t *parser, lexer_t *lexer)
 {
-
   eat(parser, lexer, QUOTE);
   node_t *node       = literal(parser, lexer);
   eat(parser, lexer, QUOTE);
@@ -242,7 +240,6 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
 
   parser->lookahead    = lexer->get_next_token(lexer);
 
-
   /* do not return a tree node for quote */
   if(type == QUOTE)
   {
@@ -257,7 +254,6 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
 
 static node_t *create_node(token_t *token)
 {  
-
   node_t *node        = (node_t *)malloc(sizeof(node_t));
   node->left          = NULL;
   node->right         = NULL;
@@ -310,9 +306,6 @@ static bool is_argument(type_t type)
 
 static bool is_literal(type_t type)
 {
-
   return type == VARIABLE || type == LITERAL || type == WHITESPACE || type == LINE_BREAK;
-
-
 }
 

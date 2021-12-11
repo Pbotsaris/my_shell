@@ -22,7 +22,8 @@
 /* CD HELPERS*/
 static void cd_handle_prevpwd(prgm_t *program);
 static void cd_handle_home(prgm_t *program);
-static void cd_handle_change(prgm_t *program, entry_t *pwd);
+static void cd_handle_change(prgm_t *program, char *new_pwd);
+static char *cd_handle_dotdot(char *dotdot_pwd);
 
 /* ENV HELPERS*/
 static envflag_t extract_flags(node_t **root);
@@ -36,7 +37,6 @@ void exit_program(prgm_t *program)
 {
   program->is_exit = true;
 }
-
 
 /**/
 
@@ -68,7 +68,6 @@ void exit_program(prgm_t *program)
 
 } 
 
-
 /**/
 
 void cd(prgm_t *program)
@@ -85,20 +84,15 @@ void cd(prgm_t *program)
     cd_handle_home(program);
     return;
   }
+    char *new_pwd             = join_path(program->env->pwd, program->ast->left->value);
+    pathnode_t *pathhead      = split_to_list(new_pwd);
+    new_pwd                   = build_path(pathhead);
+      
+  if(dir_exists(new_pwd))
+    cd_handle_change(program, new_pwd);
 
-  pathnode_t *dir_names   = split_path(program->ast->left->value);
-  entry_t *pwd            = program->env->vars->get(program->env->vars, PWD_ENV);
-
-  if(path_exists(dir_names, pwd->pair))
-    cd_handle_change(program, pwd);
-
-  else
-    printf("No such directory\n");
-
-  free_paths(dir_names);
-
+  free(new_pwd);
 }
-
 
 /**/
 
@@ -138,9 +132,7 @@ void env(prgm_t *program)
 
 }
 
-
 /*PRIVATE: CD HELPERS */
-
 
 static void cd_handle_prevpwd(prgm_t *program)
 {
@@ -155,25 +147,24 @@ static void cd_handle_prevpwd(prgm_t *program)
 
 }
 
+/**/
 
 static void cd_handle_home(prgm_t *program)
 {
-
   program->env->update_pwdprev(program->env, program->env->pwd);
   entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
   program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
-
 }
 
+/**/
 
-static void cd_handle_change(prgm_t *program, entry_t *pwd)
+static void cd_handle_change(prgm_t *program, char *new_pwd)
 {
   program->env->update_pwdprev(program->env, program->env->pwd);
-  char *npwd = new_pwd(pwd->pair, program->ast->left->value);
-  program->env->vars->insert(program->env->vars, PWD_ENV, npwd);
-  free(npwd);
-
+  program->env->vars->insert(program->env->vars, PWD_ENV, new_pwd);
 }
+
+/**/
 
 
 /*PRIVATE: ENV HELPERS */

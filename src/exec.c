@@ -125,7 +125,7 @@ static char *search_paths(exec_t *exec, char **paths, int path_len)
     }
 
   if(found)
-    return new_pwd(paths[index], exec->bin);
+    return join_path(paths[index], exec->bin);
   else
     return NULL;
 

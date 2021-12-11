@@ -27,17 +27,25 @@
 #include <sys/types.h>
 #include  <errno.h>
 
+#define CURRENT_DIR "."
+#define PARENT_DIR ".."
+#define ROOT "/"
+#define MAX_DIR_LEN 255
+#define MAX_PATH_LEN 4096
+
 typedef struct path_node
 {
-char *value;
+char value[MAX_DIR_LEN];
 struct path_node *next;
+struct path_node *prev;
 
 }pathnode_t;
 
-pathnode_t *split_path(char *path);
-bool path_exists(pathnode_t *dir_names, char *path);
-void free_paths(pathnode_t *dir_names); 
-char *new_pwd(char *pwd, char *to_join);
+bool dir_exists(char *path);
+char *join_path(char *pwd, char *to_join);  
+
+pathnode_t *split_to_list(char *path);
+char *build_path(pathnode_t *head);
 
 #endif
 
