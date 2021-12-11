@@ -20,10 +20,10 @@
 #include "../include/builtins.h"
 
 /* CD HELPERS*/
+static void cd_handle_root(prgm_t *program);
 static void cd_handle_prevpwd(prgm_t *program);
 static void cd_handle_home(prgm_t *program);
 static void cd_handle_change(prgm_t *program, char *new_pwd);
-static char *cd_handle_dotdot(char *dotdot_pwd);
 
 /* ENV HELPERS*/
 static envflag_t extract_flags(node_t **root);
@@ -72,22 +72,29 @@ void exit_program(prgm_t *program)
 
 void cd(prgm_t *program)
 { 
+ char *new_pwd;
+ char *path = program->ast->left->value;
 
-  if((strcmp(program->ast->left->value, PREVPWD))== 0)
+  if((strcmp(path, PREVPWD))== 0)
   {
     cd_handle_prevpwd(program);
     return;
   }
 
-  if((strcmp(program->ast->left->value, HOME))== 0)
+  if((strcmp(path, HOME))== 0)
   {
     cd_handle_home(program);
     return;
   }
-    char *new_pwd             = join_path(program->env->pwd, program->ast->left->value);
-    pathnode_t *pathhead      = split_to_list(new_pwd);
-    new_pwd                   = build_path(pathhead);
-      
+
+  if(path[0] == '/')
+    new_pwd                 = join_path(ROOT, ++path); /* move pointer to skip '/' */
+  else
+    new_pwd                 = join_path(program->env->pwd, path);
+
+  pathnode_t *pathhead      = split_to_list(new_pwd);
+  new_pwd                   = build_path(pathhead);
+
   if(dir_exists(new_pwd))
     cd_handle_change(program, new_pwd);
 
@@ -156,6 +163,16 @@ static void cd_handle_home(prgm_t *program)
   program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
 }
 
+
+/**/
+
+static void cd_handle_root(prgm_t *program)
+{
+  program->env->update_pwdprev(program->env, program->env->pwd);
+  program->env->vars->insert(program->env->vars, PWD_ENV, ROOT);
+}
+
+
 /**/
 
 static void cd_handle_change(prgm_t *program, char *new_pwd)
@@ -163,8 +180,6 @@ static void cd_handle_change(prgm_t *program, char *new_pwd)
   program->env->update_pwdprev(program->env, program->env->pwd);
   program->env->vars->insert(program->env->vars, PWD_ENV, new_pwd);
 }
-
-/**/
 
 
 /*PRIVATE: ENV HELPERS */

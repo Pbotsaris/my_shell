@@ -31,7 +31,6 @@ static int add_to_buffer(char *buffer, char *path, int buffer_index);
 
 pathnode_t *split_to_list(char *path)
 {
-
   char buffer[strlen(path)];
 
   pathnode_t *head   = create_node(NULL, ROOT, 2);
@@ -106,7 +105,6 @@ bool dir_exists(char *path)
 
 /**/
 
-
 char *build_path(pathnode_t *head)
 {
 
@@ -125,7 +123,6 @@ char *build_path(pathnode_t *head)
 
 static bool has_dotdot(pathnode_t *head)
 {
-
   pathnode_t *temp = head;
 
   while(temp)
@@ -148,7 +145,7 @@ static pathnode_t *reduce_path(pathnode_t *head)
   while(temp)
   {
     pathnode_t *current = temp;
-
+    /* skip when no more paths to reduce */
     if(temp->prev == head && ((strcmp(temp->value, PARENT_DIR)) == 0 || (strcmp(temp->value, CURRENT_DIR)) == 0 ))
     {
       free_path(current);
@@ -183,7 +180,6 @@ static pathnode_t *reduce_path(pathnode_t *head)
   }
 
   return head;
-
 }
 
 /**/
