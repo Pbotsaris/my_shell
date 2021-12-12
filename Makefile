@@ -4,12 +4,13 @@ BIN=bin
 
 CFLAGS +=-W  -Wall -Wextra -g3 -Iinclude -lreadline -fsanitize=address 
 
-
 CFLAGS_NO_SANINATIZE +=-W -Wall -Wextra -lreadline -g3 -Iinclude
 
 CC=gcc
 TARGET=$(BIN)/my_zsh
 RM=rm -rf
+
+$(shell mkdir -p obj bin)
 
 SRCS=$(wildcard $(SRC)/*.c)
 OBJS=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
@@ -30,3 +31,9 @@ $(OBJ)/%.o: $(SRC)/%.c
 
 clean:
 	$(RM) $(TARGET) $(BIN)/*.dSYM $(OBJ)/*.o 
+
+run:
+	./${TARGET}
+
+.PHONY:
+	all run clean
