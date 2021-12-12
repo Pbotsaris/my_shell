@@ -22,14 +22,23 @@ Or
 
     make run
 
-## Built-ins command
+## Run
 
 The following commands are built-in to the shell: `cd`, `which`, `env`, `setenv`, `unsetenv`, `pwd`, `exit` and `echo`. All binaries in your `$PATH` are also available for execution. 
 
 The shell allows for setting environment varibles using literals such as `variable=value` and the user can create as many :
 
         user - /home/dev %> USER=khalil PWD=/home EDITOR=vim 
-        khalil - /home   %> 
+        khalil - /home   %> echo $EDITOR
+        vim
+
+String literal and interpolation is supported when using the `echo` command like so:
+
+        user - /home/dev %>name=John age=41 city=Lagos
+        user - /home/dev %>echo "My name is $name and I am from $city. I have $age years old."
+        My name is John and I am from Lagos. I have 41 years old.
+
+String literals and interpolation, however, are not available for assignment like so `var="$PWD"`.
 
 ### env
 
@@ -81,7 +90,6 @@ The below syntax is also allowed:
 
 
 ### unsetenv
-
 
 `unsetenv` as the name suggests, unsets a variable of a given `key`.
 
