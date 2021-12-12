@@ -26,7 +26,7 @@ Or
 
 The following commands are built-in to the shell: `cd`, `which`, `env`, `setenv`, `unsetenv`, `pwd`, `exit` and `echo`. All binaries in your `$PATH` are also available for execution. 
 
-The shell allows for setting environment varibles using literals such as `variable=value` and the user can create as many :
+The shell allows for setting environment varibles using literals such as `variable=value`:
 
         user - /home/dev %> USER=khalil PWD=/home EDITOR=vim 
         khalil - /home   %> echo $EDITOR
