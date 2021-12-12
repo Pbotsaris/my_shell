@@ -69,21 +69,22 @@ static void insert(map_t *map, char *key, char *pair)
     return;
   }
 
-  entry_t *prev;
-
   while(entry)
   {
-    if(strcmp(entry->key, key) == 0)
+    if((strcmp(entry->key, key)) == 0)
     {
       free(entry->pair);
-      update_entry(entry, pair);
+      entry = update_entry(entry, pair);
+      break;
     }
-    prev = entry;
-    entry = prev->next;
+
+    /* no match, add to tail */
+    if(!entry->next)
+      entry->next  = create_entry(key, pair);
+
+    entry = entry->next;
 
   }
-  /* no match, add to list */
-  prev->next  = create_entry(key, pair);
 
 }
 
@@ -122,30 +123,30 @@ static bool destroy(map_t *map, char *key)
     return false;
 
 
-while(entry != NULL)
+  while(entry != NULL)
   {
     if(strcmp(entry->key, key) == 0)
     {
-    if(prev)
-       prev->next = entry->next;
-    /* if deleting first item of linked list */
-    else
-      map->entries[slot] = entry->next;
+      if(prev)
+        prev->next = entry->next;
+      /* if deleting first item of linked list */
+      else
+        map->entries[slot] = entry->next;
 
-    free(entry->key);
-    entry->key = NULL;
-    free(entry->pair);
-    entry->key = NULL;
-    free(entry);
-    entry = NULL;
-    return true;
+      free(entry->key);
+      entry->key = NULL;
+      free(entry->pair);
+      entry->key = NULL;
+      free(entry);
+      entry = NULL;
+      return true;
     }
     prev = entry;
     entry = entry->next;
 
   }
 
-//  map->entries[slot] = NULL;
+  //  map->entries[slot] = NULL;
 
   return false;
 
@@ -156,7 +157,7 @@ while(entry != NULL)
 static void destroy_all(map_t *map)
 {
 
-for(int i = 0; i < T_SIZE; i++)
+  for(int i = 0; i < T_SIZE; i++)
   {
     entry_t *entry = map->entries[i];
     entry_t *entry_to_free;
@@ -166,22 +167,22 @@ for(int i = 0; i < T_SIZE; i++)
 
     while(entry != NULL)
     {
-     free(entry->key);
-     entry->key = NULL;
-     free(entry->pair);
-     entry->key = NULL;
+      free(entry->key);
+      entry->key = NULL;
+      free(entry->pair);
+      entry->key = NULL;
 
-     entry_to_free = entry;
-     entry = entry->next;
+      entry_to_free = entry;
+      entry = entry->next;
 
-     free(entry_to_free);
-     entry_to_free = NULL;
+      free(entry_to_free);
+      entry_to_free = NULL;
     }
 
     map->entries[i] = NULL;
 
   }
-    
+
 
 }
 
@@ -207,21 +208,21 @@ static void print_all(map_t *map, bool null_flag)
     entry_t *entry = map->entries[i];
 
     if(entry == NULL)
-        continue;
+      continue;
 
     while(entry != NULL)
     {
       if(!null_flag)
-      printf("%s=%s\n", entry->key, entry->pair);
+        printf("%s=%s\n", entry->key, entry->pair);
       else
-      printf("%s=%s", entry->key, entry->pair);
+        printf("%s=%s", entry->key, entry->pair);
       entry = entry->next;
     }
 
   }
 
-   if(null_flag)
-      printf("\n");
+  if(null_flag)
+    printf("\n");
 
 }
 
@@ -273,7 +274,7 @@ static entry_t *update_entry(entry_t *entry, char *pair)
 
   strncpy(entry->pair, pair, plen);
   entry->pair[plen]       = '\0';
- 
+
 
   return entry;
 
