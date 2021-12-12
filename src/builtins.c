@@ -37,6 +37,9 @@ static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag);
 static void setenv_binary_expression(prgm_t *program, node_t *root);
 static void setenv_unary_expression(prgm_t *program, node_t *root);
 
+/* WHICH HELPERS */
+static bool is_builtins(char *cmd);
+
 /* PUBLIC */
 
 void exit_program(prgm_t *program) { program->is_exit = true; }
@@ -61,15 +64,36 @@ void unset_env(prgm_t *program)
 
   while(root)
   {
-
     program->env->vars->destroy(program->env->vars, root->value);
     root = root->left;
-
   }
 }
 
 /**/
 
+void which(prgm_t *program)
+{
+  char *cmd = program->ast->left->value;
+
+  if(is_builtins(cmd))
+    printf("%s: Shell built-in command.\n", cmd);
+  else
+  {
+    program->exec->bin = cmd;
+    char *path = program->exec->search_paths(program->exec, program->env->paths, program->env->paths_len);
+
+    if(path)
+    {
+      printf("%s\n", path);
+      free(path);
+    }
+    else
+      printf("%s not found\n", cmd);
+
+  }
+}
+
+/**/
 void echo(prgm_t *program)
 {
   /* when not a binary expression, always take left */
@@ -403,6 +427,22 @@ static void setenv_unary_expression(prgm_t *program, node_t *root)
     root = root->left->left;
 
   }
+
+}
+
+/**/
+
+static bool is_builtins(char *cmd)
+{
+
+  return (strcmp(cmd, CMD_ECHO)) == 0 ||
+    (strcmp(cmd, CMD_CD))  == 0  ||
+    (strcmp(cmd, CMD_ENV))  == 0  ||
+    (strcmp(cmd, CMD_SETENV))  == 0  ||
+    (strcmp(cmd, CMD_UNSETENV))  == 0  ||
+    (strcmp(cmd, CMD_EXIT))  == 0  ||
+    (strcmp(cmd, CMD_WHICH))  == 0  ||
+    (strcmp(cmd, CMD_PWD))  == 0;
 
 }
 

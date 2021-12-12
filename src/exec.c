@@ -37,6 +37,7 @@ exec_t *init_exec(void)
   exec->free_envp        = free_envp;
   exec->empty_envp       = empty_envp;
   exec->execute          = execute;
+  exec->search_paths     = search_paths;
   
   return exec;
 

@@ -60,7 +60,6 @@ static node_t *parse(parser_t *parser, lexer_t *lexer)
   }
 
   return command(parser, lexer);
-
 }
 
 /**/
@@ -82,11 +81,9 @@ static node_t *command(parser_t *parser, lexer_t *lexer)
     }
 
     return root;
-
   }
 
   else return builtins(parser, lexer);
-
 }
 
 /**/

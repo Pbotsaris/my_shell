@@ -34,7 +34,7 @@
 
 /* 
  *           the exec struct holds the necessary data and functionality
- *           to execute an external program with execve.
+ *           to execute an external program with execve as well as search path external bins.
  */
 
 typedef struct exec {
@@ -45,6 +45,7 @@ typedef struct exec {
   void (*free_envp) (struct exec*);                            /*  frees up array in the envp field */
   void (*empty_envp) (struct exec*);                           /*  creates an empty env in the envp field */
   void (*execute) (struct exec*, char**, int);                 /*  forks and executes an external binary in another process */
+  char *(*search_paths) (struct exec*, char**, int);           /* searches if exec->bin exists in paths */
 
 }exec_t;
 

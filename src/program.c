@@ -115,7 +115,6 @@ static void print_prompt(prgm_t *program)
 
 static void evaluate(prgm_t *program)
 {
-
   if(!program->ast)
     return;
 
@@ -173,8 +172,6 @@ static void pass_through(prgm_t *program)
 
 static void builtins(prgm_t *program)
 {
-  
-
   switch(program->ast->type)
   {
     case ECHO:
@@ -194,7 +191,7 @@ static void builtins(prgm_t *program)
       return;
 
     case SETENV:
-     set_env(program);
+      set_env(program);
       return;
 
     case UNSETENV:
@@ -206,7 +203,9 @@ static void builtins(prgm_t *program)
       return;
 
     case WHICH:
-      printf("execute WHICH\n");
+      if(is_valid_env(program))
+        which(program);
+
       return;
 
     case PWD:
