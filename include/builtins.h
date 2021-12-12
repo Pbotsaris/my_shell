@@ -30,9 +30,10 @@
 #define CDIR_SINGLE    "-C"
 #define CDIR_DOUBLE    "--chdir"
 
+
 /* CD SHORTCUTS */
 #define HOME "~"
-#define PREVPWD "-d"
+#define PREVPWD "-"
 
 typedef enum envflags{
   INIT,                /* 0 */

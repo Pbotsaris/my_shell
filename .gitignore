@@ -1,5 +1,4 @@
 obj/*.o
-bin/*
 bin/my_zsh
 *.txt
 a.out

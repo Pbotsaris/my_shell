@@ -129,13 +129,13 @@ void cd(prgm_t *program)
   char *new_pwd;
   char *path = program->ast->left->value;
 
-  if((strcmp(path, PREVPWD))== 0)
+  if((strcmp(path, PREVPWD)) == 0)
   {
     cd_handle_prevpwd(program);
     return;
   }
 
-  if((strcmp(path, HOME))== 0)
+  if((strcmp(path, HOME)) == 0)
   {
     cd_handle_home(program);
     return;
