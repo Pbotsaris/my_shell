@@ -23,7 +23,7 @@ static void insert(map_t *map, char *key, char *pair);
 static entry_t *get(map_t *map, char *key);
 static bool destroy(map_t *map, char *key);
 static void destroy_all(map_t *map);
-static void print_all(map_t *map);
+static void print_all(map_t *map, bool null_flag);
 static void free_map(map_t *map);
 static char **to_array(map_t *map);
 
@@ -200,7 +200,7 @@ static void free_map(map_t *map)
 
 /**/
 
-static void print_all(map_t *map)
+static void print_all(map_t *map, bool null_flag)
 {
   for(int i = 0; i < T_SIZE; i++)
   {
@@ -211,11 +211,17 @@ static void print_all(map_t *map)
 
     while(entry != NULL)
     {
+      if(!null_flag)
       printf("%s=%s\n", entry->key, entry->pair);
+      else
+      printf("%s=%s", entry->key, entry->pair);
       entry = entry->next;
     }
 
   }
+
+   if(null_flag)
+      printf("\n");
 
 }
 

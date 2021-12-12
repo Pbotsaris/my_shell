@@ -46,8 +46,8 @@ typedef struct env{
   int      paths_len;                                    /* length of path array */
   void     (*load)  (struct env*, char**);               /* loads envrioment variable into memory */
   void     (*free)  (struct env*);                       /* frees env module from memory */
-  void     (*print) (struct env*);                       /* prints current envirioment */
-  void     (*print_temp) (struct env*);                  /* prints current temp envirioment */
+  void     (*print) (struct env*, bool);                 /* prints current envirioment */
+  void     (*print_temp) (struct env*, bool);            /* prints current temp envirioment */
   void     (*restore_env) (struct env*, char**, bool);   /* restore an envirioment from **envs array */
   void     (*update_pwdprev) (struct env*, char*);       /* updates de prev_pwd field */
 

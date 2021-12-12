@@ -300,10 +300,10 @@ static bool is_pwd(char *cmd, int len)                     { return strncmp(cmd,
 static bool is_which(char *cmd, int len)                   { return strncmp(cmd, CMD_WHICH , len) == 0; }
 static bool is_exit(char *cmd, int len)                    { return strncmp(cmd, CMD_EXIT , len) == 0; }
 static bool is_quote(char *line, int cursor)               { return line[cursor] == '"';} 
-static bool is_flag(char *line, int cursor)                { return line[cursor] == '-' && isalpha(line[cursor + 1]);} 
+static bool is_flag(char *line, int cursor)                { return line[cursor] == '-';} 
 static bool is_doubleflag(char *line, int cursor)          { return line[cursor] == '-' && line[cursor + 1] == '-' && isalpha(line[cursor + 2]);} 
 static bool is_whitespace(char *line, int cursor)          { return line[cursor] == ' ' || line[cursor] == '\t' || line[cursor] == 10;}
-static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=' && isalpha(line[cursor - 1]) && isalpha(line[cursor + 1]);} 
+static bool is_assign_operator(char *line, int cursor)     { return line[cursor] == '=';} 
 static bool is_var(char *line, int cursor)                 { return line[cursor] == '$' && isalpha(line[cursor + 1]); }   
 static bool is_var_assignment(char *line, int cursor)      { return line[cursor] == '='; }
 static bool is_line_break(char *line, int cursor)          { return line[cursor] == '\\' && line[cursor + 1] == 'n' ;}

@@ -50,7 +50,7 @@ typedef struct map {
  entry_t        *(*get) (struct map*, char*);                    /* Searches and retrieves an entry_t with the specific key. Returns NULL if not found */
  bool            (*destroy) (struct map*, char*);                /* Removes an entry_t of the specific key. returns true of successful */
  void            (*destroy_all) (struct map*);                   /* Removes every entry_t in hash map */ 
- void            (*print_all) (struct map*);                     /* Prints the value of every entry_t in the hash map. */ 
+ void            (*print_all) (struct map*, bool);               /* Prints the value of every entry_t in the hash map. */ 
  char          **(*to_array) (struct map*);                      /* Converts hash map to array of strings like so {"key", pair, "key", "pair" ...} */ 
  void            (*free) (struct map*);                          /* Free up all memory related to this module including the module itself */ 
 

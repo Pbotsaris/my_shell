@@ -21,8 +21,8 @@
 /* PUBLIC METHOD */
 static void load(env_t *env, char **envs);
 static void free_envs(env_t *env);
-static void print_env(env_t *env);
-static void print_temp_env(env_t *env);
+static void print_env(env_t *env, bool null_flag);
+static void print_temp_env(env_t *env, bool null_flag);
 static void restore_envs(env_t *env, char **envs, bool is_init);
 static void update_pwdprev(env_t *env, char *pwd);
 
@@ -90,9 +90,9 @@ static void free_envs(env_t *env)
 
 /**/
 
-static void print_env(env_t *env)
+static void print_env(env_t *env , bool null_flag)
 {
-  env->vars->print_all(env->vars);
+  env->vars->print_all(env->vars, null_flag);
 }
 
 
@@ -104,11 +104,11 @@ static void update_pwdprev(env_t *env, char *pwd)
   if(env->prev_pwd)
   {
     free(env->prev_pwd);
-    env->prev_pwd = NULL;
+    env->prev_pwd   = NULL;
   }
 
-  size_t len = strlen(pwd);
-  env->prev_pwd = (char*) malloc((len + 1) * sizeof(char));
+  size_t len         = strlen(pwd);
+  env->prev_pwd      = (char*) malloc((len + 1) * sizeof(char));
   strncpy(env->prev_pwd, pwd, len);
   env->prev_pwd[len] = '\0';
 
@@ -117,9 +117,9 @@ static void update_pwdprev(env_t *env, char *pwd)
 
 /**/
 
-static void print_temp_env(env_t *env)
+static void print_temp_env(env_t *env, bool null_flag)
 {
-  env->temp_vars->print_all(env->temp_vars);
+  env->temp_vars->print_all(env->temp_vars, null_flag);
 }
 
 static void restore_envs(env_t *env, char **envs, bool is_init){

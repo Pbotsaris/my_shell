@@ -62,15 +62,15 @@ static void read_line(prgm_t *program)
   program->cmd->line        = readline("");
   program->cmd->len         = strlen(program->cmd->line);
 
-  program->lexer->load(program->lexer, program->cmd->line);
-  program->ast = program->parser->parse(program->parser, program->lexer);
+    program->lexer->load(program->lexer, program->cmd->line);
+    program->ast = program->parser->parse(program->parser, program->lexer);
 
-  evaluate(program);
+    evaluate(program);
+    add_history(program->cmd->line);
 
-  add_history(program->cmd->line);
+    free_ast(program->ast);
+    program->ast = NULL;
 
-  free_ast(program->ast);
-  program->ast = NULL;
   free(temp);
 
   if(lexer_line != NULL)
@@ -108,6 +108,10 @@ static void print_prompt(prgm_t *program)
 
 static void evaluate(prgm_t *program)
 {
+
+  if(!program->ast)
+    return;
+
   switch(program->ast->type)
   {
     case PASS_THROUGH:
@@ -126,7 +130,7 @@ static void evaluate(prgm_t *program)
 
 static void assign_var(prgm_t *program)
 {
-    program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
+  program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
 
 }
 

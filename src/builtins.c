@@ -20,7 +20,6 @@
 #include "../include/builtins.h"
 
 /* CD HELPERS*/
-static void cd_handle_root(prgm_t *program);
 static void cd_handle_prevpwd(prgm_t *program);
 static void cd_handle_home(prgm_t *program);
 static void cd_handle_change(prgm_t *program, char *new_pwd);
@@ -30,6 +29,7 @@ static envflag_t extract_flags(node_t **root);
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment);
 static void extract_command(prgm_t *program, node_t *root);
 static void restore_temp_env(prgm_t *program);
+static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag);
 
 /* PUBLIC */
 
@@ -111,19 +111,14 @@ void env(prgm_t *program)
 
   /* env with no operands */
   if(!root && flag == INIT)
-    program->env->print(program->env);
+    program->env->print(program->env, false);
 
-  if(flag == UNSET)
-  {
-    if(!program->env->temp_vars->destroy(program->env->temp_vars, root->value))
-      printf("%s does not exist in the enviroment\n", root->value);
-
-    root = root->left;
-  }
+  if( flag == UNSET && !(handle_unset(program, root,flag)))
+    return;
 
   /* extracts env vars assigment operands. stores new root position in program->exec->root to extract command */
   if(root && root->type == ASSIGN_OPERATOR)
-    extract_env(program, root, false);
+    extract_env(program, root, flag == NILL);
 
   program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
   /* if no assigment, set program->exec->root manually */
@@ -133,6 +128,13 @@ void env(prgm_t *program)
   /* extract command to be execute via env*/
   if(program->exec->root)
     extract_command(program, program->exec->root);
+
+  /* print if no cmd to execute */
+  if(!program->exec->bin)
+    program->env->print_temp(program->env, flag == NILL);
+  else
+  /* this will execute the command */
+    program->exec->execute(program->exec, program->env->paths, program->env->paths_len);
 
   restore_temp_env(program);
   program->exec->free_envp(program->exec);
@@ -162,16 +164,6 @@ static void cd_handle_home(prgm_t *program)
   entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
   program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
 }
-
-
-/**/
-
-static void cd_handle_root(prgm_t *program)
-{
-  program->env->update_pwdprev(program->env, program->env->pwd);
-  program->env->vars->insert(program->env->vars, PWD_ENV, ROOT);
-}
-
 
 /**/
 
@@ -294,5 +286,31 @@ static void restore_temp_env(prgm_t *program)
 
   free(env);
 
+}
+
+static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag )
+{
+  if(flag == UNSET)
+  {
+    if(!root)
+    {
+      printf("env: option requires an argument -- \'u\' \n");
+      return NULL;
+    }
+
+    if(!(program->env->temp_vars->destroy(program->env->temp_vars, root->value)))
+    {
+      printf("env: %s does not exist in the enviroment\n", root->value);
+      return NULL;
+    }
+
+    /* if left is null print the modified envirioment prematurely as parent function will return */ 
+    if(!root->left)
+       program->env->print_temp(program->env, flag == NILL);
+
+    return root->left;
+  }
+
+  return root;
 }
 
