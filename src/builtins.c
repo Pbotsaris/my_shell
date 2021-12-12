@@ -29,8 +29,9 @@ static envflag_t extract_flags(node_t **root);
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment);
 static void extract_command(prgm_t *program, node_t *root);
 static void restore_temp_env(prgm_t *program);
-static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag);
+static bool handle_flags(prgm_t *program, node_t **root, envflag_t flag);
 static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag);
+static node_t *handle_chdir(prgm_t *program, node_t *root);
 
 
 /* SETENV HELPERS */
@@ -163,7 +164,7 @@ void env(prgm_t *program)
   envflag_t flag            = extract_flags(&root);
   program->exec->root       = NULL;
 
-  if(handle_flags(program, root, flag))
+  if(handle_flags(program, &root, flag))
     return;
 
   /* extracts env vars assigment operands. stores new root position in program->exec->root to extract command */
@@ -194,6 +195,10 @@ void env(prgm_t *program)
   /* restore temp env according to env */
   restore_temp_env(program);
 
+  /* restore directory after execution */
+  if(flag == CDIR)
+    chdir(program->env->pwd);
+
   program->exec->free_envp(program->exec);
 
 }
@@ -211,6 +216,7 @@ static void cd_handle_prevpwd(prgm_t *program)
   program->env->vars->insert(program->env->vars, PWD_ENV, program->env->prev_pwd);
   program->env->update_pwdprev(program->env, buffer);
 
+  chdir(program->env->prev_pwd);
 }
 
 /**/
@@ -220,6 +226,8 @@ static void cd_handle_home(prgm_t *program)
   program->env->update_pwdprev(program->env, program->env->pwd);
   entry_t *home = program->env->vars->get(program->env->vars, HOME_ENV);
   program->env->vars->insert(program->env->vars, PWD_ENV, home->pair);
+
+ chdir(home->pair);
 }
 
 /**/
@@ -228,6 +236,8 @@ static void cd_handle_change(prgm_t *program, char *new_pwd)
 {
   program->env->update_pwdprev(program->env, program->env->pwd);
   program->env->vars->insert(program->env->vars, PWD_ENV, new_pwd);
+
+ chdir(new_pwd);
 }
 
 
@@ -255,7 +265,7 @@ static envflag_t extract_flags(node_t **root)
     else if((strcmp((*root)->value, NILL_SINGLE) == 0) || strcmp((*root)->value, NILL_DOUBLE) == 0 )
       flag = NILL;
 
-    else if((strcmp((*root)->value, CDIR_SINGLE) == 0) || strcmp((*root)->value, CDIR_DOUBLE) == 0 )
+    else if((strcmp((*root)->value, CDIR_SINGLE) == 0))
       flag = CDIR;
 
     else
@@ -345,7 +355,7 @@ static void restore_temp_env(prgm_t *program)
 
 /**/
 
-static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag)
+static bool handle_flags(prgm_t *program, node_t **root, envflag_t flag)
 {
 
   /* env with no operands */
@@ -358,7 +368,10 @@ static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag)
   if(!root && flag == IGNORE)
     return true;
 
-  if((flag == UNSET && !(handle_unset(program, root,flag))))
+  if(flag == CDIR && !(*root = handle_chdir(program, *root)))
+    return true;
+
+  if((flag == UNSET && !(*root = handle_unset(program, *root, flag))))
     return true;
 
   if(flag == NILL)
@@ -396,6 +409,30 @@ static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag )
   }
 
   return root;
+}
+
+static node_t *handle_chdir(prgm_t *program, node_t *root)
+{
+  
+  if(!root)
+  {
+    printf("env: option requires an argument -- \'C\'\n");
+    return NULL;
+  }
+
+  char *path = join_path(program->env->pwd, root->value);
+
+  if(chdir(path) != 0)
+  {
+    printf("env: directory does not exist\n");
+    free(path);
+    return NULL;
+  }
+  else
+  {
+    free(path);
+    return root->left;
+  }
 }
 
 /* SETENV HELPER */

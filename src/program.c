@@ -161,7 +161,7 @@ static void pass_through(prgm_t *program)
   }
 
   program->exec->argv[index]   = NULL;
-  program->exec->envp          = program->env->vars->to_array(program->env->temp_vars);
+  program->exec->envp          = program->env->vars->to_array(program->env->vars);
 
   program->exec->execute(program->exec, program->env->paths, program->env->paths_len);
   program->exec->free_envp(program->exec);
