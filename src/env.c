@@ -25,6 +25,9 @@ static void print_env(env_t *env, bool null_flag);
 static void print_temp_env(env_t *env, bool null_flag);
 static void restore_envs(env_t *env, char **envs, bool is_init);
 static void update_pwdprev(env_t *env, char *pwd);
+static void load_paths(env_t *env);
+static void load_user(env_t *env);
+static void load_pwd(env_t *env);
 
 /* PRIVATE */
 static void load_envs(env_t *env, char **envs);
@@ -53,7 +56,10 @@ env_t *init_env(void)
   env->print           = print_env;
   env->print_temp      = print_temp_env;
   env->restore_env     = restore_envs;
-  env->update_pwdprev  =  update_pwdprev;
+  env->update_pwdprev  = update_pwdprev;
+  env->load_paths      = load_paths;
+  env->load_user       = load_user;
+  env->load_pwd        = load_pwd;
 
   return env;
 }
@@ -62,7 +68,8 @@ env_t *init_env(void)
 
 static void load(env_t *env, char **envs)
 {
-  load_envs(env, envs);
+  if(envs[0])
+      load_envs(env, envs);
 }
 
 /**/
@@ -122,6 +129,38 @@ static void print_temp_env(env_t *env, bool null_flag)
   env->temp_vars->print_all(env->temp_vars, null_flag);
 }
 
+/**/
+
+static void load_paths(env_t *env)
+{
+
+  entry_t *path     = env->vars->get(env->vars, PATH_ENV);
+
+  if(path)
+    split_paths(env, path->pair);
+}
+
+
+static void load_user(env_t *env)
+{
+
+  entry_t *user = env->vars->get(env->vars, USER_ENV);
+
+  if(user)
+    env->user = user->pair;
+}
+
+
+static void load_pwd(env_t *env)
+{
+  entry_t *pwd = env->vars->get(env->vars, PWD_ENV);
+  if(pwd)
+    env->pwd = pwd->pair;
+}
+
+
+/**/
+
 static void restore_envs(env_t *env, char **envs, bool is_init){
 
   int i              = 0;
@@ -151,6 +190,7 @@ static void restore_envs(env_t *env, char **envs, bool is_init){
 
 static void load_envs(env_t *env, char **envs)
 {
+  return;
 
   restore_envs(env, envs, true);
 
@@ -168,10 +208,9 @@ static void load_envs(env_t *env, char **envs)
 }
 
 
-
-
 /* PRIVATE HELPERS */
 
+/**/
 
 static void split_paths(env_t *env, char *paths)
 {

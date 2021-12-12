@@ -29,6 +29,7 @@ static envflag_t extract_flags(node_t **root);
 static void extract_env(prgm_t *program, node_t *root, bool was_assignment);
 static void extract_command(prgm_t *program, node_t *root);
 static void restore_temp_env(prgm_t *program);
+static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag);
 static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag);
 
 /* PUBLIC */
@@ -109,18 +110,19 @@ void env(prgm_t *program)
   envflag_t flag            = extract_flags(&root);
   program->exec->root       = NULL;
 
-  /* env with no operands */
-  if(!root && flag == INIT)
-    program->env->print(program->env, false);
-
-  if( flag == UNSET && !(handle_unset(program, root,flag)))
+  if(handle_flags(program, root, flag))
     return;
 
   /* extracts env vars assigment operands. stores new root position in program->exec->root to extract command */
   if(root && root->type == ASSIGN_OPERATOR)
     extract_env(program, root, flag == NILL);
 
-  program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
+  if(flag == IGNORE)
+    program->exec->empty_envp(program->exec);
+  
+  else
+    program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
+   
   /* if no assigment, set program->exec->root manually */
   if(!program->exec->root)
     program->exec->root = root;
@@ -133,11 +135,13 @@ void env(prgm_t *program)
   if(!program->exec->bin)
     program->env->print_temp(program->env, flag == NILL);
   else
-  /* this will execute the command */
+    /* this will execute the command */
     program->exec->execute(program->exec, program->env->paths, program->env->paths_len);
 
+  /* restore temp env according to env */
   restore_temp_env(program);
-  program->exec->free_envp(program->exec);
+
+ program->exec->free_envp(program->exec);
 
 }
 
@@ -271,7 +275,6 @@ static void extract_command(prgm_t *program, node_t *root)
 
 static void restore_temp_env(prgm_t *program)
 {
-
   char **env        = program->env->vars->to_array(program->env->vars);
   int count         = 0;
 
@@ -285,7 +288,32 @@ static void restore_temp_env(prgm_t *program)
   }
 
   free(env);
+}
 
+
+static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag)
+{
+
+  /* env with no operands */
+  if(!root && flag == INIT)
+  {
+    program->env->print(program->env, false);
+    return true;
+  }
+
+  if(!root && flag == IGNORE)
+    return true;
+
+  if((flag == UNSET && !(handle_unset(program, root,flag))))
+    return true;
+
+  if(flag == NILL)
+  {
+    program->env->print_temp(program->env, flag == NILL);
+    return true;
+  }
+
+  return false;
 }
 
 static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag )
@@ -306,7 +334,7 @@ static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag )
 
     /* if left is null print the modified envirioment prematurely as parent function will return */ 
     if(!root->left)
-       program->env->print_temp(program->env, flag == NILL);
+      program->env->print_temp(program->env, flag == NILL);
 
     return root->left;
   }

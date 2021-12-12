@@ -50,6 +50,9 @@ typedef struct env{
   void     (*print_temp) (struct env*, bool);            /* prints current temp envirioment */
   void     (*restore_env) (struct env*, char**, bool);   /* restore an envirioment from **envs array */
   void     (*update_pwdprev) (struct env*, char*);       /* updates de prev_pwd field */
+  void     (*load_paths) (struct env*);                  /* loads up the paths field from the env */
+  void     (*load_user) (struct env*);                   /* loads up the user field from the env */
+  void     (*load_pwd) (struct env*);                    /* loads up the pwd field from the env */  
 
 }env_t;
 

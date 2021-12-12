@@ -20,6 +20,7 @@
 
 
 static void free_envp(exec_t *exec);
+static void empty_envp(exec_t *exec);
 static void execute(exec_t *exec, char **paths, int path_len);
 static void fork_and_exec(exec_t *exec, char *cmd_path);
 static char *search_paths(exec_t *exec, char **paths, int path_len);
@@ -34,6 +35,7 @@ exec_t *init_exec(void)
   exec->argv[0]          = NULL;
   exec->root             = NULL;
   exec->free_envp        = free_envp;
+  exec->empty_envp       = empty_envp;
   exec->execute          = execute;
   
   return exec;
@@ -53,6 +55,12 @@ static void free_envp(exec_t *exec)
 
   free(exec->envp);
 
+}
+
+static void empty_envp(exec_t *exec)
+{
+  exec->envp = (char**)malloc(sizeof(char*));
+  exec->envp[0] = NULL;
 }
 
 static void execute(exec_t *exec, char **paths, int paths_len)
@@ -107,8 +115,6 @@ static void fork_and_exec(exec_t *exec, char *cmd_path)
     printf("%d", wpid);
 
   }
-
-
 }
 
 

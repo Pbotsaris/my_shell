@@ -43,6 +43,7 @@ typedef struct exec {
   char *argv[MAX_ARGV_LEN];                                    /*  arguments for execve. MAX of 99 arguments */
   char **envp;                                                 /*  envirioment for execve */
   void (*free_envp) (struct exec*);                            /*  frees up array in the envp field */
+  void (*empty_envp) (struct exec*);                           /*  creates an empty env in the envp field */
   void (*execute) (struct exec*, char**, int);                 /*  forks and executes an external binary in another process */
 
 }exec_t;

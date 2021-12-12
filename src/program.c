@@ -29,6 +29,8 @@ static void builtins(prgm_t *program);
 static void pass_through(prgm_t *program);
 static void assign_var(prgm_t *program);
 static void free_ast(node_t *ast);
+static void load_on_empty_env(prgm_t *program);
+static bool is_valid_env(prgm_t *program);
 
 
 /* PUBLIC INITIALIZER */
@@ -57,6 +59,8 @@ prgm_t *init_program(char **envs)
 
 static void read_line(prgm_t *program)
 {
+  load_on_empty_env(program);
+
   char *lexer_line          = program->lexer->line;
   char *temp                = program->cmd->line;
   program->cmd->line        = readline("");
@@ -97,11 +101,15 @@ static void free_program(prgm_t *program)
 static void print_prompt(prgm_t *program) 
 {
   /* update pwd at every command in case of cd */
-  entry_t *pwd          = program->env->vars->get(program->env->vars, PWD_ENV);
-  program->env->pwd     = pwd->pair;
+  entry_t *pwd             = program->env->vars->get(program->env->vars, PWD_ENV);
 
+  if(pwd)
+     program->env->pwd     = pwd->pair;
+
+  if(program->env->user && program->env->pwd)
   printf("%s %s %s %s", program->env->user, PSEP, program->env->pwd, PSUFIX);
-
+  else
+  printf("You have an empty enviroment.\nSet USER, PWD and PATH for this program to run correctly.\n%s%s", PSEP, PSUFIX);
 }
 
 /* PRIVATE */
@@ -138,6 +146,7 @@ static void assign_var(prgm_t *program)
 
 static void pass_through(prgm_t *program)
 {
+
   int index                   = 0;
   node_t *root                = program->ast;
   program->exec->bin          = root->value;
@@ -166,6 +175,10 @@ static void pass_through(prgm_t *program)
 
 static void builtins(prgm_t *program)
 {
+  
+  if(!(is_valid_env(program)))
+    return;
+
   switch(program->ast->type)
   {
     case ECHO:
@@ -225,4 +238,24 @@ static void free_ast(node_t *ast)
 
 /**/
 
+static void load_on_empty_env(prgm_t *program)
+{
+  if(!program->env->user)
+    program->env->load_user(program->env);
+
+
+  if(!program->env->pwd)
+    program->env->load_pwd(program->env);
+
+  if(!program->env->paths)
+    program->env->load_paths(program->env);
+
+}
+
+/**/
+
+static bool is_valid_env(prgm_t *program)
+{
+  return program->env->user && program->env->pwd && program->env->paths;
+}
 
