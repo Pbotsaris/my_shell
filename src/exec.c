@@ -26,7 +26,6 @@ static void fork_and_exec(exec_t *exec, char *cmd_path);
 static char *search_paths(exec_t *exec, char **paths, int path_len);
 static bool bin_exists(char *path, char *cmd);
 
-
 exec_t *init_exec(void)
 {
   exec_t * exec          = (exec_t*)malloc(sizeof(exec_t));
@@ -89,31 +88,37 @@ static void execute(exec_t *exec, char **paths, int paths_len)
 static void fork_and_exec(exec_t *exec, char *cmd_path)
 {
 
-  pid_t pid, wpid;
+  pid_t pid;
   int status;
 
   if ((pid = fork()) == 0)
   {
+
     if((execve(cmd_path, exec->argv, exec->envp)) == -1)
     {
       perror(exec->bin);
       exit(EXIT_FAILURE);
     }
-    exit(EXIT_SUCCESS);
   }
 
   else if(pid == -1)
+  {
     printf("error executing binary\n");
+    exit(EXIT_FAILURE);
+  }
 
   else
   {
     do 
-      wpid = waitpid(pid, &status, WUNTRACED);
+    {
+        // It was terminated by a segfault
+      waitpid(pid, &status, WUNTRACED);
+
+      if (WTERMSIG(status) == SIGSEGV)
+        printf("%s: Segmentation fault\n", exec->bin);
+
+    }
     while (!WIFEXITED(status) && !WIFSIGNALED(status));
-
-
-  if(wpid == 0)
-    printf("%d", wpid);
 
   }
 }
@@ -144,6 +149,7 @@ static bool bin_exists(char *path, char *cmd)
 
   struct dirent *pDirent;
   DIR *dir;
+
 
   if((dir = opendir(path)) == NULL)
     return false;

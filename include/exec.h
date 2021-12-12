@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #include "../include/env.h"
 #include "../include/parser.h"
