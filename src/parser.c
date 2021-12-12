@@ -71,7 +71,19 @@ static node_t *command(parser_t *parser, lexer_t *lexer)
     return pass_through(parser, lexer);
 
   if(parser->lookahead->type == VARIABLE_ASSIGN)
-    return variable_assign(parser, lexer);
+  {
+
+    node_t *root      = variable_assign(parser, lexer);
+
+    while(parser->lookahead && parser->lookahead->type == VARIABLE_ASSIGN)
+    {
+    node_t *tail      = get_left_tail(root);
+    tail->left        =  variable_assign(parser, lexer);
+    }
+
+    return root;
+
+  }
 
   else return builtins(parser, lexer);
 

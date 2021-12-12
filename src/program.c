@@ -31,6 +31,7 @@ static void assign_var(prgm_t *program);
 static void free_ast(node_t *ast);
 static void load_on_empty_env(prgm_t *program);
 static bool is_valid_env(prgm_t *program);
+static void assignment(prgm_t *program, node_t *root);
 
 /* PUBLIC INITIALIZER */
 prgm_t *init_program(char **envs)
@@ -136,8 +137,7 @@ static void evaluate(prgm_t *program)
 
 static void assign_var(prgm_t *program)
 {
-  program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
-
+ assignment(program, program->ast);
 }
 
 
@@ -260,5 +260,21 @@ static void load_on_empty_env(prgm_t *program)
 static bool is_valid_env(prgm_t *program)
 {
   return program->env->user != NULL && program->env->pwd != NULL && program->env->paths != NULL;
+}
+
+/**/
+
+static void assignment(prgm_t *program, node_t *root)
+{
+
+  if(!root)
+    return;
+
+  if(root->type == ASSIGN_OPERATOR) 
+    program->env->vars->insert(program->env->vars, root->left->value, root->right->value);
+
+  assignment(program, root->left);
+  assignment(program, root->right);
+
 }
 
