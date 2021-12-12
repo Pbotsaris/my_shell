@@ -49,7 +49,6 @@ prgm_t *init_program(char **envs)
   program->is_exit          = false;
   program->cmd->line        = NULL;
 
-
   program->env->load(program->env, envs);
 
   return program;
@@ -176,8 +175,6 @@ static void pass_through(prgm_t *program)
 static void builtins(prgm_t *program)
 {
   
-  if(!(is_valid_env(program)))
-    return;
 
   switch(program->ast->type)
   {
@@ -186,11 +183,15 @@ static void builtins(prgm_t *program)
       return;
 
     case CD:
-      cd(program);
+      if(!(is_valid_env(program)))
+        cd(program);
+
       return;
 
     case ENV:
-      env(program);
+      if(!(is_valid_env(program)))
+        env(program);
+
       return;
 
     case SETENV:
@@ -200,6 +201,7 @@ static void builtins(prgm_t *program)
     case UNSETENV:
       printf("execute UNSETENV\n");
       return;
+
     case EXIT:
       exit_program(program);
       return;
@@ -209,7 +211,9 @@ static void builtins(prgm_t *program)
       return;
 
     case PWD:
-      printf("%s\n", program->env->pwd);
+      if(!(is_valid_env(program)))
+        printf("%s\n", program->env->pwd);
+
       return;
 
     default:

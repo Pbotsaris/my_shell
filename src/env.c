@@ -68,8 +68,8 @@ env_t *init_env(void)
 
 static void load(env_t *env, char **envs)
 {
-  if(envs[0])
-      load_envs(env, envs);
+  if(envs[0] != NULL)
+     load_envs(env, envs);
 }
 
 /**/
@@ -190,8 +190,6 @@ static void restore_envs(env_t *env, char **envs, bool is_init){
 
 static void load_envs(env_t *env, char **envs)
 {
-  return;
-
   restore_envs(env, envs, true);
 
   entry_t *path     = env->vars->get(env->vars, PATH_ENV);

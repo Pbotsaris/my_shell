@@ -39,6 +39,12 @@ void exit_program(prgm_t *program)
   program->is_exit = true;
 }
 
+//void setenv(prgm_t *program)
+//{
+//  program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
+//}
+
+
 /**/
 
  void echo(prgm_t *program)
