@@ -32,7 +32,6 @@ static void free_ast(node_t *ast);
 static void load_on_empty_env(prgm_t *program);
 static bool is_valid_env(prgm_t *program);
 
-
 /* PUBLIC INITIALIZER */
 prgm_t *init_program(char **envs)
 {
@@ -183,23 +182,23 @@ static void builtins(prgm_t *program)
       return;
 
     case CD:
-      if(!(is_valid_env(program)))
+      if(is_valid_env(program))
         cd(program);
 
       return;
 
     case ENV:
-      if(!(is_valid_env(program)))
+      if(is_valid_env(program))
         env(program);
 
       return;
 
     case SETENV:
-      printf("execute SETENV\n");
+     set_env(program);
       return;
 
     case UNSETENV:
-      printf("execute UNSETENV\n");
+      unset_env(program);
       return;
 
     case EXIT:
@@ -211,7 +210,7 @@ static void builtins(prgm_t *program)
       return;
 
     case PWD:
-      if(!(is_valid_env(program)))
+      if(is_valid_env(program))
         printf("%s\n", program->env->pwd);
 
       return;
@@ -260,6 +259,6 @@ static void load_on_empty_env(prgm_t *program)
 
 static bool is_valid_env(prgm_t *program)
 {
-  return program->env->user && program->env->pwd && program->env->paths;
+  return program->env->user != NULL && program->env->pwd != NULL && program->env->paths != NULL;
 }
 

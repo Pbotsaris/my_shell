@@ -33,6 +33,7 @@ static void add_token_value(token_t *token, char* cmd, int len);
 
 /* FUNCTION POINTERS */
 static int extract_value(lexer_t *lexer, char *buffer);
+static int extract_whitespaces(lexer_t *lexer, char *buffer);
 static void skip_whitespace(lexer_t *lexer);
 
 /* CONDITIONALS */
@@ -81,6 +82,7 @@ static void load(lexer_t *lexer, char *cmd)
   lexer->len               = strlen(cmd);
   lexer->line              = (char*)malloc((lexer->len + 1) * sizeof(char));
   lexer->is_first          = true;
+  lexer->is_echo           = false; 
 
   strncpy(lexer->line, cmd, lexer->len);
    
@@ -198,7 +200,10 @@ static token_t *next_tokens(lexer_t *lexer)
   /* tokenize whisspace when echo */
 
   else if(lexer->is_echo && is_whitespace(lexer->line, lexer->cursor))
+  {
+//    lexer->cursor++;
     return tokenize(lexer, WHITESPACE);
+  }
 
 
   /* tokenize linebreaks with echo */
@@ -221,7 +226,14 @@ static token_t *tokenize(lexer_t *lexer, type_t type)
 {
 
   char buffer[lexer->len];
-  int len = extract_value(lexer, buffer);
+  int len;
+
+  if(type == WHITESPACE)
+   len = extract_whitespaces(lexer, buffer);
+
+    else
+   len = extract_value(lexer, buffer);
+
   return token_with_value(buffer, len, type);
 }
 
@@ -278,6 +290,23 @@ static int extract_value(lexer_t *lexer, char *buffer)
   return i;
 }
 
+static int extract_whitespaces(lexer_t *lexer, char *buffer)
+{
+
+  int i = 0;
+  while(lexer->line[lexer->cursor] == ' ')
+  {
+
+    buffer[i] = lexer->line[lexer->cursor];
+    lexer->cursor++;
+    i++;
+  }
+
+  buffer[i++] = '\0';
+  return i;
+
+  }
+
 /**/
 
 static void skip_whitespace(lexer_t *lexer)
@@ -285,7 +314,6 @@ static void skip_whitespace(lexer_t *lexer)
   while(lexer->line[lexer->cursor] == ' ')
     lexer->cursor++;
 }
-
 
 /* CODITIONALS */
 

@@ -73,6 +73,8 @@ void echo(prgm_t *program);
 void cd(prgm_t *program);
 void env(prgm_t *program);
 void exit_program(prgm_t *program);
+void set_env(prgm_t *program);
+void unset_env(prgm_t *program);
 
 /* initialization */
 prgm_t *init_program(char **envs);

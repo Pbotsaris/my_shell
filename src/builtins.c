@@ -32,22 +32,45 @@ static void restore_temp_env(prgm_t *program);
 static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag);
 static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag);
 
+
+/* SETENV HELPERS */
+static void setenv_binary_expression(prgm_t *program, node_t *root);
+static void setenv_unary_expression(prgm_t *program, node_t *root);
+
 /* PUBLIC */
 
-void exit_program(prgm_t *program)
-{
-  program->is_exit = true;
-}
-
-//void setenv(prgm_t *program)
-//{
-//  program->env->vars->insert(program->env->vars, program->ast->left->value, program->ast->right->value);
-//}
-
+void exit_program(prgm_t *program) { program->is_exit = true; }
 
 /**/
 
- void echo(prgm_t *program)
+void set_env(prgm_t *program)
+{
+  node_t *root = program->ast->left;
+
+  if(root->type == ASSIGN_OPERATOR)
+    setenv_binary_expression(program, root);
+  else
+    setenv_unary_expression(program, root);
+}
+
+/**/
+
+void unset_env(prgm_t *program)
+{
+  node_t *root = program->ast->left;
+
+  while(root)
+  {
+
+    program->env->vars->destroy(program->env->vars, root->value);
+    root = root->left;
+
+  }
+}
+
+/**/
+
+void echo(prgm_t *program)
 {
   /* when not a binary expression, always take left */
   node_t *root              = program->ast->left;
@@ -79,8 +102,8 @@ void exit_program(prgm_t *program)
 
 void cd(prgm_t *program)
 { 
- char *new_pwd;
- char *path = program->ast->left->value;
+  char *new_pwd;
+  char *path = program->ast->left->value;
 
   if((strcmp(path, PREVPWD))== 0)
   {
@@ -125,10 +148,10 @@ void env(prgm_t *program)
 
   if(flag == IGNORE)
     program->exec->empty_envp(program->exec);
-  
+
   else
     program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
-   
+
   /* if no assigment, set program->exec->root manually */
   if(!program->exec->root)
     program->exec->root = root;
@@ -147,7 +170,7 @@ void env(prgm_t *program)
   /* restore temp env according to env */
   restore_temp_env(program);
 
- program->exec->free_envp(program->exec);
+  program->exec->free_envp(program->exec);
 
 }
 
@@ -296,6 +319,7 @@ static void restore_temp_env(prgm_t *program)
   free(env);
 }
 
+/**/
 
 static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag)
 {
@@ -322,6 +346,8 @@ static bool handle_flags(prgm_t *program, node_t *root, envflag_t flag)
   return false;
 }
 
+/**/
+
 static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag )
 {
   if(flag == UNSET)
@@ -346,5 +372,37 @@ static node_t *handle_unset(prgm_t *program, node_t *root, envflag_t flag )
   }
 
   return root;
+}
+
+/* SETENV HELPER */
+
+static void setenv_binary_expression(prgm_t *program, node_t *root)
+{
+
+  if(!root)
+    return;
+
+  if(root->type == ASSIGN_OPERATOR)
+    program->env->temp_vars->insert(program->env->vars, root->left->value, root->right->value);
+
+  setenv_binary_expression(program, root->left);
+  setenv_binary_expression(program, root->right);
+}
+
+/**/
+
+static void setenv_unary_expression(prgm_t *program, node_t *root)
+{
+  while(root)
+  {
+
+    if(!root->left)
+      break;
+
+    program->env->vars->insert(program->env->vars, root->value, root->left->value);
+    root = root->left->left;
+
+  }
+
 }
 

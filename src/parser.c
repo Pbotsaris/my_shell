@@ -81,10 +81,10 @@ static node_t *command(parser_t *parser, lexer_t *lexer)
 
 static node_t *pass_through(parser_t *parser, lexer_t *lexer)
 {
-    node_t *root = eat(parser, lexer, PASS_THROUGH);
+  node_t *root = eat(parser, lexer, PASS_THROUGH);
 
-    if(parser->lookahead)
-       root->left = operands(parser, lexer);
+  if(parser->lookahead)
+    root->left = operands(parser, lexer);
 
   return  root;
 }
@@ -98,7 +98,7 @@ static node_t *builtins(parser_t *parser, lexer_t *lexer)
 
   /* not using right branch for commands as they are not binary operations */
   if(parser->lookahead != NULL)
-      root->left      = operands(parser, lexer);
+    root->left      = operands(parser, lexer);
 
   return  root;
 }
@@ -112,9 +112,9 @@ static node_t *variable_assign(parser_t *parser, lexer_t *lexer)
   node_t *right      = NULL;
 
   if(parser->lookahead->type == QUOTE)
-     right           = quotes(parser, lexer);
+    right           = quotes(parser, lexer);
   else
-     right           = literal(parser, lexer);
+    right           = literal(parser, lexer);
 
   root->left = left;
   root->right = right;
@@ -131,7 +131,6 @@ static node_t *operands(parser_t *parser, lexer_t *lexer)
 
   while(parser->lookahead && is_argument(parser->lookahead->type))
   {
-
     /* always to the left */
     node_t *tail     = get_left_tail(root);
     tail->left       = arguments(parser, lexer);
@@ -145,6 +144,9 @@ static node_t *operands(parser_t *parser, lexer_t *lexer)
 
 static node_t *arguments(parser_t *parser, lexer_t *lexer)
 {
+  if(!parser->lookahead)
+    return NULL;
+
   if(parser->lookahead->type == FLAG)
     return eat(parser, lexer, FLAG);
 
@@ -161,10 +163,13 @@ static node_t *arguments(parser_t *parser, lexer_t *lexer)
     return eat(parser, lexer, VARIABLE);
 
   if(parser->lookahead->type == VARIABLE_ASSIGN)
-      return variable_assign(parser, lexer);
+    return variable_assign(parser, lexer);
 
   if(parser->lookahead->type == WHITESPACE)
-    return eat(parser, lexer, WHITESPACE);
+  {
+    parser->lookahead = lexer->get_next_token(lexer);
+    return arguments(parser, lexer);
+   }
 
   return NULL;
 }
@@ -190,26 +195,26 @@ static node_t *literal(parser_t *parser, lexer_t *lexer)
 
   while(parser->lookahead && is_literal(parser->lookahead->type))
   {
-
-  if(parser->lookahead->type == LITERAL)
+    
+    if(parser->lookahead->type == LITERAL)
       literal = eat(parser, lexer, LITERAL);
 
-  else if(parser->lookahead->type == VARIABLE)
-     literal = eat(parser, lexer, VARIABLE);
+    else if(parser->lookahead->type == VARIABLE)
+      literal = eat(parser, lexer, VARIABLE);
 
-  else if(parser->lookahead->type == WHITESPACE)
-     literal = eat(parser, lexer, WHITESPACE);
+    else if(parser->lookahead->type == WHITESPACE)
+      literal = eat(parser, lexer, WHITESPACE);
 
-  else if(parser->lookahead->type == LINE_BREAK)
-     literal = eat(parser, lexer, LINE_BREAK);
+    else if(parser->lookahead->type == LINE_BREAK)
+      literal = eat(parser, lexer, LINE_BREAK);
 
-   if(root)
-   {
+    if(root)
+    {
       tail = get_left_tail(root);
       tail->left     = literal;
-   }
-   else
-     root            = literal;
+    }
+    else
+      root            = literal;
 
   }
 
@@ -236,8 +241,8 @@ static node_t *eat(parser_t *parser, lexer_t *lexer, type_t type)
     printf("unexpected token. \n");
     parser->valid = false;
     return NULL;
-  }
 
+  }
   parser->lookahead    = lexer->get_next_token(lexer);
 
   /* do not return a tree node for quote */
