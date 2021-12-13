@@ -173,7 +173,6 @@ void env(prgm_t *program)
 
   if(flag == IGNORE)
     program->exec->empty_envp(program->exec);
-
   else
     program->exec->envp = program->env->temp_vars->to_array(program->env->temp_vars);
 

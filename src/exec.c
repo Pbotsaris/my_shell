@@ -25,6 +25,7 @@ static void execute(exec_t *exec, char **paths, int path_len);
 static void fork_and_exec(exec_t *exec, char *cmd_path);
 static char *search_paths(exec_t *exec, char **paths, int path_len);
 static bool bin_exists(char *path, char *cmd);
+static void reset_pointers(exec_t *exec); 
 
 exec_t *init_exec(void)
 {
@@ -42,19 +43,20 @@ exec_t *init_exec(void)
 
 }
 
-
 static void free_envp(exec_t *exec)
 {
 
   int count = 0;
+
   while(exec->envp[count])
   {
     free(exec->envp[count]);
+    exec->envp[count] = NULL;
     count++;
   }
 
   free(exec->envp);
-
+  exec->envp = NULL;
 }
 
 static void empty_envp(exec_t *exec)
@@ -117,6 +119,7 @@ static void fork_and_exec(exec_t *exec, char *cmd_path)
       if (WTERMSIG(status) == SIGSEGV)
         printf("%s: Segmentation fault\n", exec->bin);
 
+     reset_pointers(exec);
     }
     while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
@@ -164,6 +167,17 @@ static bool bin_exists(char *path, char *cmd)
   closedir(dir);
 
   return false;
+
+}
+
+static void reset_pointers(exec_t *exec)
+{
+
+  exec->bin = NULL;
+  
+ int count = 0;
+  while(exec->argv[count])
+   exec->argv[count] = NULL;
 
 }
 
