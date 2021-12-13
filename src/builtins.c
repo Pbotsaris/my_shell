@@ -330,8 +330,8 @@ static void extract_command(prgm_t *program, node_t *root)
 
   /* last item is a null */
   program->exec->argv[index] = NULL;
-
 }
+
 
 /**/
 
@@ -358,13 +358,13 @@ static bool handle_flags(prgm_t *program, node_t **root, envflag_t flag)
 {
 
   /* env with no operands */
-  if(!root && flag == INIT)
+  if(!(*root) && flag == INIT)
   {
     program->env->print(program->env, false);
     return true;
   }
 
-  if(!root && flag == IGNORE)
+  if(!(*root) && flag == IGNORE)
     return true;
 
   if(flag == CDIR && !(*root = handle_chdir(program, *root)))
